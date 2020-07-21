@@ -1,4 +1,4 @@
-Plant ID,Pop,Block,X,flowering_date,flower_number ,Leaf Toughness,% Water Content,growth_rate,Bolt Date,SLA,Above_mass,Below_mass,Num_Trichomes,leaf_Herb_Sept,bug,hight,leaf_herb_July,S. florida,M. brevivatella ,Fruit,l1,l2,l3,l4,l5,d1,d2,d3,d4,d5
+Plant ID,Pop,Block,X,Flowering_Date,Flower_Number ,Leaf_Toughness,Water_Content,Growth_Rate,Bolt_Date,SLA,Above_mass,Below_mass,Num_Trichomes,Leaf_Herb_Sept,bug,Hight,Leaf_herb_July,S.florida,M.brevivatella ,Fruit,l1,l2,l3,l4,l5,d1,d2,d3,d4,d5
 1,22,1,,228,10,120,80.15377222,0.108635956,130,61.79371853,97.1,8.8,100,0.9,7,169,0.6,0,0,233,26.55,25.16,34.52,33.65,30.15,3.9,4.45,4.59,4.86,4.41
 2,22,2,,229,10,120,74.88372093,0.108635956,130,45.71584182,158,13.6,86,1.4,16,168,0.6,1,0,391,28.6,26.07,23.53,32.77,31.09,3.92,4.37,3.96,4.72,4.82
 3,22,4,,,,60,,0.077663334,134,,,,,,0,,,,,NA,,,,,,,,,,
