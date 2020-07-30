@@ -66,7 +66,7 @@ ggplot(data=ksr_i,aes(x=log(1+Fruit_no_damage))) + geom_histogram()+theme_classi
 
 ksr_i <- left_join(ksr_i,climate_lat,by="Pop") #Add lat/climate to individual dataset
 
-write.csv(ksr_i,'Data/ksr_i') #Export individual plants file
+write.csv(ksr_i,'Data/ksr_i.csv') #Export individual plants file
 
 
 ############################
