@@ -5,6 +5,7 @@
 #################
 
 library(tidyverse)
+library(Hmisc)
 
 ############################
 #Lat, distance, climate
@@ -16,7 +17,7 @@ climate_lat <- climate_lat %>% select(Pop,Latitude,Longitude,Distance, #Organize
                                       MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/sun
                                       MAP,MSP,CMD,RH) # Precipt/moiusture
 #Correlate all climate
-library(Hmisc)
+
 climate_matrix <-climate_lat %>% select(MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/sun
                                         MAP,MSP,CMD,RH) # Precipt/moiusture
 climate_matrix <- as.matrix(climate_matrix)
@@ -33,6 +34,9 @@ KSR_RH<-69 # Calculated the same as KSR_MAT
 climate_lat <- climate_lat %>% #This info can then be joined to invidual plant and chem means datasets
   mutate(MAT_Distance=MAT-KSR_MAT) %>% mutate(MSP_Distance=MSP-KSR_MSP) %>% 
   mutate(CMD_Distance=CMD-KSR_CMD) %>% mutate(RH_Distance=RH-KSR_RH)
+climate_lat <- climate_lat %>% filter(Pop!=659) %>% # Remove population from Italy (European hybrid)
+  filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
+  filter(Pop!=877) # Remove,unclear where it is from.
 
 ########################################################
 #Individual dataset seed number calculations
@@ -46,7 +50,7 @@ ksr_width <- ksr_i %>% select(d1,d2,d3,d4,d5) ; ksr_Mw<-rowMeans(ksr_width,na.rm
 ksr_i <- ksr_i %>% mutate (F_length=ksr_Ml) %>% mutate (F_width=ksr_Mw) # Add averages to ksr_i
 ksr_i$F_length[ksr_i$F_length=="NaN"]<-0 ; ksr_i$F_width[ksr_i$F_width=="NaN"]<-0 # remove NaNs and replace with 0
 ksr_i <- ksr_i %>% mutate(Fruit_correction=ifelse(Fruit==0,0,1)) # Generate dummy variable to ensure 0 fruits becomes 0 seeds
-ksr_i <- ksr_i %>%
+ksr_i <- ksr_i %>% #Seeds per fruit formula from Agrawal et al. 2012 Am Nat
   mutate (Seeds_per_fruit=(2.33*F_length*F_width - 102.47)*Fruit_correction) %>% # Calculate number of seeds per 1 fruit
   mutate(Seeds_no_round=Fruit_no_damage*Seeds_per_fruit) %>% # calculate number of seeds per all undamaged fruits
   mutate(Seeds=round(Seeds_no_round))
@@ -58,15 +62,9 @@ ksr_i <- ksr_i %>% filter(Pop!=659) %>% # Remove population from Italy (European
   filter(Pop!=877) # Remove,unclear where it is from.
 ksr_i$Seeds[ksr_i$Seeds<0]<-0 #Nine cases of plants with <0 fruits assigned zero. Small L & W suggest aborted fruits
 
-#Assess normality of seeds
-qqnorm(ksr_i$Fruit_no_damage) # ~ Extreme left skew, zero inflated.
-ggplot(data=ksr_i,aes(x=Fruit_no_damage)) + geom_histogram()+theme_classic()
-qqnorm(log(1+ksr_i$Fruit_no_damage)) # ~ Extreme zero inflation
-ggplot(data=ksr_i,aes(x=log(1+Fruit_no_damage))) + geom_histogram()+theme_classic()
+#ksr_i <- left_join(ksr_i,climate_lat,by="Pop") #Add lat/climate to individual dataset
 
-ksr_i <- left_join(ksr_i,climate_lat,by="Pop") #Add lat/climate to individual dataset
-
-write.csv(ksr_i,'Data/ksr_i.csv') #Export individual plants file
+#write.csv(ksr_i,'Data/ksr_i.csv') #Export individual plants file
 
 
 ############################
@@ -96,28 +94,54 @@ oe_fruit <- oe %>% filter(Tissue=="Fruit") %>% select(-Tissue)%>%
 oe_all <- left_join(oe_leaf,oe_flower,by="Pop") %>% left_join(oe_fruit,by="Pop") #generate oenothein dataframe
 
 chm<-left_join(totphe_all,oe_all,by="Pop") # join total phenolics with oenothein data
-ksr_seed <- ksr_i %>% select(Pop,Seeds) # select seed data from indvidual plant data frame
-ksr_seed <- ksr_seed %>% group_by(Pop) %>% summarise (Seeds=mean(Seeds)) # Take mean of seed data
-chm<-left_join(chm,ksr_seed,by="Pop") # Add seed means to chemistry
 chm <- chm %>% filter(Pop!=659) %>% # Remove population from Italy (European hybrid)
   filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
   filter(Pop!=877) # Remove,unclear where it is from.
+ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_no_damage,-Fruit_correction,
+                             -Seeds_per_fruit) # Remove variables where mean is not needed
+#Take mean of each variable from ksr_i
+  ksr_seed <- ksr_i %>% group_by(Pop) %>% summarise(Seeds=mean(Seeds,na.rm=TRUE))  
+  ksr_fl <- ksr_i %>% group_by(Pop) %>% summarise(Flowering_Date=mean(Flowering_Date,na.rm=TRUE))
+  ksr_lt <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_Toughness=mean(Leaf_Toughness,na.rm=TRUE)) 
+  ksr_wc <- ksr_i %>% group_by(Pop) %>% summarise(Water_Content=mean(Water_Content,na.rm=TRUE))
+  ksr_gr <- ksr_i %>% group_by(Pop) %>% summarise(Growth_Rate=mean(Growth_Rate,na.rm=TRUE))
+  ksr_bd <- ksr_i %>% group_by(Pop) %>% summarise(Bolt_Date=mean(Bolt_Date,na.rm=TRUE))
+  ksr_SLA <- ksr_i %>% group_by(Pop) %>% summarise(SLA=mean(SLA,na.rm=TRUE))
+  ksr_am <- ksr_i %>% group_by(Pop) %>% summarise(Above_mass=mean(Above_mass,na.rm=TRUE)) 
+  ksr_bm <- ksr_i %>% group_by(Pop) %>% summarise(Below_mass=mean(Below_mass,na.rm=TRUE))
+  ksr_tri <- ksr_i %>% group_by(Pop) %>% summarise(Num_Trichomes=mean(Num_Trichomes,na.rm=TRUE))
+  ksr_lhs <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_Herb_Sept=mean(Leaf_Herb_Sept,na.rm=TRUE))
+  ksr_bug <- ksr_i %>% group_by(Pop) %>% summarise(bug=mean(bug,na.rm=TRUE))
+  ksr_h <- ksr_i %>% group_by(Pop) %>% summarise(Hight=mean(Hight,na.rm=TRUE))
+  ksr_lhj <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_herb_July=mean(Leaf_herb_July,na.rm=TRUE)) 
+  ksr_sf <- ksr_i %>% group_by(Pop) %>% summarise(S.florida=mean(S.florida,na.rm=TRUE)) 
+  ksr_mb <- ksr_i %>% group_by(Pop) %>% summarise(M.brevivatella=mean(M.brevivatella,na.rm=TRUE))
+  
+#Join all means into one data frame
+  ksr_means_prep<-left_join(ksr_seed,ksr_fl,by="Pop") %>% 
+    left_join(ksr_lt,by="Pop") %>%
+    left_join(ksr_wc,by="Pop") %>%
+    left_join(ksr_gr,by="Pop") %>%
+    left_join(ksr_bd,by="Pop") %>%
+    left_join(ksr_SLA,by="Pop") %>%
+    left_join(ksr_am,by="Pop") %>%
+    left_join(ksr_bm,by="Pop") %>%
+    left_join(ksr_tri,by="Pop") %>%
+    left_join(ksr_lhs,by="Pop") %>%
+    left_join(ksr_bug,by="Pop") %>%
+    left_join(ksr_h,by="Pop") %>%
+    left_join(ksr_lhj,by="Pop") %>%
+    left_join(ksr_sf,by="Pop") %>%
+    left_join(ksr_mb,by="Pop")
+  
+#Generate one full dataset for climate and trait means
+ksr_m<- left_join(climate_lat,ksr_means_prep,by="Pop") %>% left_join(chm,by="Pop")
+ksr_m[ksr_m=="NaN"]<-NA #Remove NaN and replace with NA
 
-write.csv(chm,'Data/chm.csv') #Export chemistry file
+#Rounding does not work, retain flowering time, seed bolt date as decimals
+#ksr_m$Seeds<-round(chm$Seeds,0) #Round seeds to whole numbers
+#ksr_m$Flowering_Date<-round(chm$Flowering_Date,0) #Round seeds to whole numbers
+#ksr_m$Bolt_Date<-round(chm$Bold_Date,0) #Round seeds to whole numbers
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+write.csv(ksr_m,'Data/ksr_m.csv') #Export neabs file again
 
