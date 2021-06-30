@@ -39,7 +39,7 @@ attach(ksr_m)
       axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
       axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot1
-  
+ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
 
 
 ##################################################################################
@@ -56,7 +56,7 @@ attach(ksr_m)
                          axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot2
-
+  ggsave("2.Diatance.pdf", width = 7, height = 6, units = "in")
 
 ##################################################################################  
 #3. What environmental variables at each location best predicts success?
@@ -68,30 +68,29 @@ attach(ksr_m)
   stepAIC(qu_env,direction="both") # Keep MAT and RH
   qu_MAT_RH <- glm.nb(Seeds ~ MAT + RH + I(MAT^2) + I(RH^2), data=ksr_m)
   Anova(qu_MAT_RH,type=3) #MAT significant, RH marginally significant
-  #Visregs of full model produce very large /different seed values. Graph individually
-  visreg(qu_MAT_RH, "MAT", scale="response", partial=TRUE, gg=TRUE)
-  visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE, gg=TRUE)
   
-  #Produce graphs of each variable seperately
   #MAT
-  qu_MAT<- glm.nb(Seeds ~ MAT + I(MAT^2), data=ksr_m)
-  stepAIC(qu_MAT,direction="both") #Keep quadratic
-  Anova(qu_MAT,type=3) 
-  #Plot
-  plot3 <-visreg(qu_MAT, "MAT", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
-  geom_point(size=1)+ scale_x_continuous(name="Mean Annual Temperature (°C)")+
-  scale_y_continuous(name="Seed Number")+ theme_classic()
-  plot3 <- plot3 + theme(axis.text.x = element_text(size=13, face="bold"),
-                       axis.text.y = element_text(size=13,face="bold"),
-                       axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
-                       axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
-  plot3
-
-  #RH, not included in paper
-  qu_RH<- glm.nb(Seeds ~ RH + I(RH^2), data=ksr_m)
-  stepAIC(qu_RH,direction="both") #Keep quadratic
-  Anova(qu_RH,type=3)
-  visreg(qu_RH, "RH", scale="response", partial=TRUE, gg=TRUE)
+  plot3A <-visreg(qu_MAT_RH, "MAT", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="Mean Annual Temperature (°C)")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot3A <- plot3A + theme(axis.text.x = element_text(size=13, face="bold"),
+                         axis.text.y = element_text(size=13,face="bold"),
+                         axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
+                         axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot3A
+  ggsave("3A.Diatance.pdf", width = 7, height = 6, units = "in")
+  
+  #RH 
+  visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE, gg=TRUE)
+  plot3B <-visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="Relative Huminidty (%)")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot3B <- plot3B + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot3B
+  ggsave("3B.Diatance.pdf", width = 7, height = 6, units = "in")
   
   
 ##################################################################################
@@ -121,6 +120,7 @@ attach(ksr_m)
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot4
   
+  ggsave("4.MAT_distance.pdf", width = 7, height = 6, units = "in")
   
 ## Cowplot export at 11 X 7 inches
   plot_grid(plot1,plot2,plot3,plot4,ncol = 2)
@@ -153,9 +153,10 @@ attach(ksr_m)
     scale_y_continuous(name="Seed Number")+ theme_classic()
   plot5a <- plot5a + theme(axis.text.x = element_text(size=13, face="bold"),
                          axis.text.y = element_text(size=13,face="bold"),
-                         axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                         axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot5a
+  ggsave("5A.bug.pdf", width = 7, height = 6, units = "in")
   
   #b. Does seed predation impact seed number?
   sf_mb <- ksr_m %>% select(Pop,Seeds, S.florida, M.brevivatella) #subset data
@@ -175,19 +176,20 @@ attach(ksr_m)
     scale_y_continuous(name="Seed Number")+ theme_classic()
   plot5b <- plot5b + theme(axis.text.x = element_text(size=13, face="bold"),
                            axis.text.y = element_text(size=13,face="bold"),
-                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot5b
-  
+  ggsave("5B.sf.pdf", width = 7, height = 6, units = "in")
   
   plot5c <- visreg(qu_sf_mb, "M.brevivatella", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_x_continuous(name="M. brevivitella Damanged Fruits")+
     scale_y_continuous(name="Seed Number")+ theme_classic()
   plot5c <- plot5c + theme(axis.text.x = element_text(size=13, face="bold"),
                            axis.text.y = element_text(size=13,face="bold"),
-                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot5c
+  ggsave("5C.mb.pdf", width = 7, height = 6, units = "in")
 
   ## Cowplot export at 4 X 11 inches
   plot_grid(plot5a,plot5b,plot5c,ncol = 3)
@@ -214,22 +216,24 @@ attach(ksr_m)
 #Graphs
   #Flowering Date
   plot6a <- visreg(qu_pheno_2, "Flowering_Date", scale="response", partial=TRUE, gg=TRUE , line=list(col="black")) +
-  geom_point(size=1)+ scale_x_continuous(name="Flowering Date")+
+  geom_point(size=1)+ scale_x_continuous(name="Flowering Date",limits = c(150,300))+
   scale_y_continuous(name="Seed Number")+ theme_classic()
   plot6a <- plot6a + theme(axis.text.x = element_text(size=13, face="bold"),
                              axis.text.y = element_text(size=13,face="bold"),
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
-  plot6a   
+  plot6a
+  ggsave("6a.Flowering.pdf", width = 7, height = 6, units = "in")
 #Bolt Date
   plot6b <- visreg(qu_pheno_2, "Bolt_Date", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
-  geom_point(size=1)+ scale_x_continuous(name="Bold Date")+
+  geom_point(size=1)+ scale_x_continuous(name="Bolt Date")+
   scale_y_continuous(name="Seed Number")+ theme_classic()
   plot6b <- plot6b + theme(axis.text.x = element_text(size=13, face="bold"),
                          axis.text.y = element_text(size=13,face="bold"),
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
-  plot6b   
+  plot6b
+  ggsave("6b.bolt.pdf", width = 7, height = 6, units = "in")
 #Growth Rate
   plot6c <- visreg(qu_pheno_2, "Growth_Rate", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
   geom_point(size=1)+ scale_x_continuous(name="Growth Rate")+
@@ -239,7 +243,7 @@ attach(ksr_m)
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6c   
-
+  ggsave("6c.Growth_rate.pdf", width = 7, height = 6, units = "in")
     
 ## Cowplot export at 4 X 11 inches
   plot_grid(plot6a,plot6b,plot6c,ncol = 3)  
@@ -264,9 +268,46 @@ attach(ksr_m)
   qu_morpho_2 <- glm.nb(Seeds ~ SLA + Water_Content + I(Water_Content^2) + 
                           Num_Trichomes + I(Num_Trichomes^2), data=morpho)
   Anova(qu_morpho_2 ,type=3) #SLA not significant
-  visreg(qu_morpho_2, "Water_Content", scale="response", partial=TRUE, gg=TRUE) 
-  visreg(qu_morpho_2, "Num_Trichomes", scale="response", partial=TRUE, gg=TRUE)
- 
+
+  #Trichomes
+  plot7a <- visreg(qu_morpho_2, "Num_Trichomes", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="Trichome Number")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot7a <- plot7a + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot7a
+  ggsave("7a.Tricomes.pdf", width = 7, height = 6, units = "in")
+  
+  
+  
+  #Water Content
+  plot7b <- visreg(qu_morpho_2, "Water_Content", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="% Water Content")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot7b <- plot7b + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot7b
+  ggsave("7b.wc.pdf", width = 7, height = 6, units = "in")
+  
+  
+  #SLA
+  plot7c <- visreg(qu_morpho_2, "SLA", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="SLA")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot7c <- plot7c + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot7c
+  ggsave("7c.SLA.pdf", width = 7, height = 6, units = "in")
+  
+  
+  ## Cowplot export at 4 X 11 inches
+  plot_grid(plot7a,plot7b,plot7c,ncol = 3)  
   
 ##################################################################################
   #Chemistry Data
@@ -301,30 +342,52 @@ attach(ksr_m)
   stepAIC(qu_tphe_leaf,direction="both") #keep leaf and Leaf^2
   Anova(qu_tphe_leaf,type = 3) # leaf not significant
   
+  #Leaf Total Phenolics
+  plot8a<-visreg(qu_tphe_leaf, "Leaf_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,150000),
+                                           breaks=c(25000,50000,75000,100000,125000,150000))+
+    scale_x_continuous(name="Leaf Total Phenolics (mg/g)")+ theme_classic()
+  plot8a <- plot8a +   theme(axis.text.x = element_text(size=13, face="bold"),
+                             axis.text.y = element_text(size=13,face="bold"),
+                             axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                             axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot8a
+  ggsave("8a_Leaf_totphe.pdf",width=7,height=6,units="in")
+  
   #models for Flower & Fruit 
   qu_tph_flr <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2) + 
                          Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
   stepAIC(qu_tph_flr,direction="both") #remove flower_Totphe 1st order
-
   qu_flr_2 <- glm.nb(Seeds ~ I(Flower_Totphe^2) + Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
   Anova(qu_flr_2 ,type = 3) #Remove qudratic effect of Fruit_Totphe
-  qu_flr <- glm.nb(Seeds ~ I(Flower_Totphe^2) + Fruit_Totphe, data=tphe_flr) #incorrect
-  Anova(qu_flr ,type = 3) #Remove qudratic effect of Fruit_Totphe
-  visreg(qu_flr, "Flower_Totphe", scale="response", partial=TRUE, gg=TRUE) 
-  visreg(qu_flr, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE) 
 
-  #Make Plot
-  plot8B<-visreg(qu_flr, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+
+  #Flower Total Phenolics
+  plot8b<-visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,150000),
+                                           breaks=c(25000,50000,75000,100000,125000,150000))+
+    scale_x_continuous(name="Flower Total Phenolics (mg/g)")+ theme_classic()
+  plot8b <- plot8b +   theme(axis.text.x = element_text(size=13, face="bold"),
+                             axis.text.y = element_text(size=13,face="bold"),
+                             axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                             axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot8b
+  ggsave("8b_Flower_totphe.pdf",width=7,height=6,units="in")
+  
+  #Fruit Total Phenolics
+  plot8c<-visreg(qu_flr_2, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,150000),
                         breaks=c(25000,50000,75000,100000,125000,150000))+
-    scale_x_continuous(name="Total Phenolics (mg/g)")+ theme_classic()
-  plot8B <- plot8B + theme(axis.text.x = element_text(size=18, face="bold"),
-                         axis.text.y = element_text(size=18,face="bold"),
-                         axis.title.x = element_text(color="black", size=28, vjust = 0, face="bold"),
-                         axis.title.y = element_text(color="black", size=28,vjust = 2, face="bold",hjust=0.6))
-  plot8B
-  ggsave("Fig8.pdf",width=8,height=6,units="in")
+    scale_x_continuous(name="Fruit Total Phenolics (mg/g)")+ theme_classic()
+  plot8c <- plot8c +   theme(axis.text.x = element_text(size=13, face="bold"),
+                             axis.text.y = element_text(size=13,face="bold"),
+                             axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                             axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot8c
+  ggsave("8c_Fruit_totphe.pdf",width=7,height=6,units="in")
   
+  ## Cowplot export at 4 X 11 inches
+  plot_grid(plot8a,plot8b,plot8c,ncol = 3)  
   
   
 ##################################################################################
@@ -332,56 +395,94 @@ attach(ksr_m)
     oenothein <- ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A, Leaf_Ox_Oenothein_A,
                            Flower_Oenothein_B, Flower_Oenothein_A, Flower_Ox_Oenothein_A,
                            Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A) #subset data
+    oenothein.matrix <- ksr_m %>% select(Leaf_Oenothein_B, Leaf_Oenothein_A, Leaf_Ox_Oenothein_A,
+                                Flower_Oenothein_B, Flower_Oenothein_A, Flower_Ox_Oenothein_A,
+                                Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A) #subset data
     oenothein <- na.omit(oenothein) #remove NA rows
-    oenothein_matrix <- as.matrix(oenothein)
-    rcorr(oenothein_matrix) # All oenothein highly correlated. Do each tissue separately. Lump A and oxA together
+    oenothein <- na.omit(oenothein.matrix) #remove NA rows
+    oenothein_matrix <- as.matrix(oenothein.matrix)
+    rcorr.oe<-rcorr(oenothein_matrix) # All oenothein highly correlated. Do each tissue separately. Lump A and oxA together
+        write.csv(rcorr.oe$r,"oe_rcorr.csv", row.names = TRUE)
+
+#models Leaf
+    oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,Leaf_Ox_Oenothein_A)
+    plot(oe_Leaf$Leaf_Oenothein_A,oe_Leaf$Seeds) #Could be second order
+    plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
+    plot(oe_Leaf$Leaf_Ox_Oenothein_A,oe_Leaf$Seeds) #Could be second order
     
-    #models Fruit
+    qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) +
+                                Leaf_Ox_Oenothein_A + I(Leaf_Ox_Oenothein_A^2),data=oe_Leaf)
+    stepAIC(qu_oeA_Leaf,direction="both") # Quadratic effects removed
+    qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + Leaf_Ox_Oenothein_A ,data=oe_Leaf)
+    Anova(qu_A_Leaf,type = 3) # Nothing significant
+    
+    plot9a<-visreg(qu_A_Leaf, "Leaf_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+      geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
+                                             breaks=c(25000,50000,75000,100000))+
+      scale_x_continuous(name="Leaf Oenothein A (mg/g)")+ theme_classic()
+    plot9a <- plot9a +   theme(axis.text.x = element_text(size=13, face="bold"),
+                               axis.text.y = element_text(size=13,face="bold"),
+                               axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                               axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+    plot9a
+    ggsave("9a_Leaf_oe.pdf",width=7,height=6,units="in")
+    
+    
+    
+#models Flower
+    oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A,Flower_Ox_Oenothein_A)
+    plot(oe_Flower$Flower_Oenothein_A,oe_Flower$Seeds) #Could also be qudratic
+   plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
+    plot(oe_Flower$Flower_Ox_Oenothein_A,oe_Flower$Seeds) #First order only
+    
+    qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2) + Flower_Oenothein_B 
+                            + Flower_Ox_Oenothein_A,data=oe_Flower)
+    stepAIC(qu_oeA_Flower,direction="both") #ox oenothein A removed
+    qu_A_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
+    Anova(qu_A_Flower,type = 3) # OeA significant
+    
+    plot9b<-visreg(qu_A_Flower, "Flower_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+      geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
+                                             breaks=c(25000,50000,75000,100000))+
+      scale_x_continuous(name="Flower Oenothein A (mg/g)")+ theme_classic()
+    plot9b <- plot9b +   theme(axis.text.x = element_text(size=13, face="bold"),
+                               axis.text.y = element_text(size=13,face="bold"),
+                               axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                               axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+    plot9b
+    ggsave("9b_Flower_oe.pdf",width=7,height=6,units="in") #missing out outlier
+    
+    
+
+
+#models Fruit
     oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A)
     plot(oe_Fruit$Fruit_Oenothein_B,oe_Fruit$Seeds) #First order only
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
     plot(oe_Fruit$Fruit_Ox_Oenothein_A,oe_Fruit$Seeds)
     
-    qu_oeA_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_A+Fruit_Ox_Oenothein_A,data=oe_Fruit)
+    qu_oeA_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Oenothein_B + 
+                             Fruit_Ox_Oenothein_A,data=oe_Fruit)
     stepAIC(qu_oeA_Fruit,direction="both")
-    Anova(qu_oeA_Fruit,type = 3) # OeA significant
-    visreg(qu_oeA_Fruit, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE)
-    
-    qu_oeB_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_B,data=oe_Fruit)
-    Anova(qu_oeB_Fruit ,type = 3) # OeA significant
-    visreg(qu_oeB_Fruit, "Fruit_Oenothein_B", scale="response", partial=TRUE, gg=TRUE)
-    
-    #models Flower
-    oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A,Flower_Ox_Oenothein_A)
-    plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
-    plot(oe_Flower$Flower_Oenothein_A,oe_Flower$Seeds) #Could also be qudratic
-    plot(oe_Flower$Flower_Ox_Oenothein_A,oe_Flower$Seeds) #First order only
-    
-    qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2) 
-                            + Flower_Ox_Oenothein_A,data=oe_Flower)
-    stepAIC(qu_oeA_Flower,direction="both") #ox oenothein A removed
-    qu_A_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
-    Anova(qu_A_Flower,type = 3) # OeA significant
-    visreg(qu_A_Flower, "Flower_Oenothein_A", scale="response", partial=TRUE, gg=TRUE)
-    
-    qu_oeB_Flower <- glm.nb(Seeds ~ Flower_Oenothein_B,data=oe_Flower)
-    Anova(qu_oeB_Flower ,type = 3) # OeA significant
-    visreg(qu_oeB_Flower, "Flower_Oenothein_B", scale="response", partial=TRUE, gg=TRUE)
-    
-    #models Leaf
-    oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,Leaf_Ox_Oenothein_A)
-    plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
-    plot(oe_Leaf$Leaf_Oenothein_A,oe_Leaf$Seeds) #Could be second order
-    plot(oe_Leaf$Leaf_Ox_Oenothein_A,oe_Leaf$Seeds) #Could be second order
-    
-    qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) +
-                            Leaf_Ox_Oenothein_A + I(Leaf_Ox_Oenothein_A^2),data=oe_Leaf)
-    stepAIC(qu_oeA_Leaf,direction="both") # Quadratic effects removed
-    qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + Leaf_Ox_Oenothein_A ,data=oe_Leaf)
-    Anova(qu_A_Leaf,type = 3) # Nothing significant
+    qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Ox_Oenothein_A,data=oe_Fruit)
+        Anova(qu_oeA_Fruit2,type = 3) # OeA significant
 
-    qu_oeB_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_B,data=oe_Leaf)
-    Anova(qu_oeB_Leaf ,type = 3) # Not significant
+    plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+      geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
+                                             breaks=c(25000,50000,75000,100000))+
+      scale_x_continuous(name="Fruit Oenothein A (mg/g)")+ theme_classic()
+    plot9c <- plot9c +   theme(axis.text.x = element_text(size=13, face="bold"),
+                               axis.text.y = element_text(size=13,face="bold"),
+                               axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
+                               axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+    plot9c
+    ggsave("9c_Fruit_oe.pdf",width=7,height=6,units="in") #missing out outlier
+    
+    ## Cowplot export at 4 X 11 inches
+    plot_grid(plot9a,plot9b,plot9c,ncol = 3)    
+
+    
+
   
 
 ##################################################################################
@@ -416,4 +517,29 @@ attach(ksr_m)
         axis.text.y = element_text(size=14,face="bold"),
         axis.title.x = element_text(size=14, vjust = 0.5, face="bold"),
         axis.title.y = element_text(color="black", size=14,vjust = 2, face="bold",hjust=0.5))
+    
+    
+    
+    #Produce graphs of each variable seperately
+    #MAT
+    qu_MAT<- glm.nb(Seeds ~ MAT + I(MAT^2), data=ksr_m)
+    stepAIC(qu_MAT,direction="both") #Keep quadratic
+    Anova(qu_MAT,type=3) 
+    #Plot
+    plot3 <-visreg(qu_MAT, "MAT", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+      geom_point(size=1)+ scale_x_continuous(name="Mean Annual Temperature (°C)")+
+      scale_y_continuous(name="Seed Number")+ theme_classic()
+    plot3 <- plot3 + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=15, vjust = 0, face="bold"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+    plot3
+    
+    #RH, not included in paper
+    qu_RH<- glm.nb(Seeds ~ RH + I(RH^2), data=ksr_m)
+    stepAIC(qu_RH,direction="both") #Keep quadratic
+    Anova(qu_RH,type=3)
+    visreg(qu_RH, "RH", scale="response", partial=TRUE, gg=TRUE)
+    
+    
   
