@@ -1,5 +1,5 @@
 ##################################################################################
-# Analyses lat, climate, and plat data predicting seed number
+# Analyses lat, climate, and mean trait data predicting seed number
 ## Daniel Anstett
 ## February 2 2021
 ##################################################################################
