@@ -134,7 +134,8 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   
 ##################################################################################
 #5. Does herb impact predict success?
-    #a. Do leaf herbiovry and xylem feeders impact seed number?
+
+  #a. Do leaf herbiovry and xylem feeders impact seed number?
   leaf_bug <- ksr_m %>% select(Pop,Seeds, Leaf_Herb_Sept, bug) #subset data
   leaf_bug <- na.omit(leaf_bug) #remove NA rows
   cor(leaf_bug$Leaf_Herb_Sept,leaf_bug$bug) #not correlated
@@ -158,7 +159,7 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   plot5a
   ggsave("5A.bug.pdf", width = 7, height = 6, units = "in")
   
-  #b. Does seed predation impact seed number?
+  #c. Does seed predation impact seed number?
   sf_mb <- ksr_m %>% select(Pop,Seeds, S.florida, M.brevivatella) #subset data
   sf_mb <- na.omit(sf_mb) #remove NA rows
   cor(sf_mb$S.florida,sf_mb$M.brevivatella) #not correlated
@@ -195,6 +196,34 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   plot_grid(plot5a,plot5b,plot5c,ncol = 3)
   
 
+  
+  
+  #ommitted
+  # Do leaf herbiovry and xylem feeders impact seed number?
+  leaf_bug <- ksr_m %>% select(Pop,Seeds, Leaf_Herb_Sept, bug) #subset data
+  leaf_bug <- na.omit(leaf_bug) #remove NA rows
+  cor(leaf_bug$Leaf_Herb_Sept,leaf_bug$bug) #not correlated
+  
+  #Test leaf bug models
+  plot(Leaf_Herb_Sept,Seeds) # all could have quadratic components
+  plot(bug,Seeds)
+  qu_leaf_bug <- glm.nb(Seeds ~ Leaf_Herb_Sept + bug + I(Leaf_Herb_Sept^2) + I(bug^2), data=ksr_m)
+  stepAIC(qu_leaf_bug,direction="both") # bug only selected
+  qu_bug <- glm.nb(Seeds ~ bug + I(bug^2), data=ksr_m)
+  Anova(qu_leaf_bug,type=3) #Leaf herbivory not significant
+  Anova(qu_bug,type=3) #Bug and Bug^2 highly significant
+  #bug not having a negative effect no seed number
+  plot5a <- visreg(qu_bug, "bug", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    geom_point(size=1)+ scale_x_continuous(name="Philaenus spumarius")+
+    scale_y_continuous(name="Seed Number")+ theme_classic()
+  plot5a <- plot5a + theme(axis.text.x = element_text(size=13, face="bold"),
+                           axis.text.y = element_text(size=13,face="bold"),
+                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
+                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
+  plot5a
+  ggsave("5A.bug.pdf", width = 7, height = 6, units = "in")
+  
+  
 ##################################################################################
 #6. Does phenology predict success?
   pheno <- ksr_m %>% select(Pop, Seeds, Flowering_Date, Bolt_Date, Growth_Rate) #subset data
@@ -337,6 +366,8 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   plot(tphe_flr$Flower_Totphe,tphe_flr$Seeds)
   plot(tphe_flr$Fruit_Totphe,tphe_flr$Seeds)
   
+  
+################################
   #models for Leaf
   qu_tphe_leaf <- glm.nb(Seeds ~ Leaf_Totphe + I(Leaf_Totphe^2), data=tphe_leaf)
   stepAIC(qu_tphe_leaf,direction="both") #keep leaf and Leaf^2
@@ -353,13 +384,13 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot8a
   ggsave("8a_Leaf_totphe.pdf",width=7,height=6,units="in")
-  
-  #models for Flower & Fruit 
-  qu_tph_flr <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2) + 
-                         Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
-  stepAIC(qu_tph_flr,direction="both") #remove flower_Totphe 1st order
-  qu_flr_2 <- glm.nb(Seeds ~ I(Flower_Totphe^2) + Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
-  Anova(qu_flr_2 ,type = 3) #Remove qudratic effect of Fruit_Totphe
+
+################################ 
+  #models for Flower 
+  qu_tph_fl <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
+  stepAIC(qu_tph_fl,direction="both") #remove flower_Totphe 1st order
+  qu_flr_2 <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
+  Anova(qu_flr_2 ,type = 3) #Not significant, qudratic marginal
 
 
   #Flower Total Phenolics
@@ -374,8 +405,15 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   plot8b
   ggsave("8b_Flower_totphe.pdf",width=7,height=6,units="in")
   
+################################   
+  #models for Flower & Fruit 
+  qu_tph_r <- glm.nb(Seeds ~ Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
+  stepAIC(qu_tph_r,direction="both") # Keep both main effect and quadratic effect
+  qu_flr_3 <- glm.nb(Seeds ~ Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
+  Anova(qu_flr_3 ,type = 3) #
+  
   #Fruit Total Phenolics
-  plot8c<-visreg(qu_flr_2, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+  plot8c<-visreg(qu_flr_3, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,150000),
                         breaks=c(25000,50000,75000,100000,125000,150000))+
     scale_x_continuous(name="Fruit Total Phenolics (mg/g)")+ theme_classic()
@@ -386,8 +424,8 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
   plot8c
   ggsave("8c_Fruit_totphe.pdf",width=7,height=6,units="in")
   
-  ## Cowplot export at 4 X 11 inches
-  plot_grid(plot8a,plot8b,plot8c,ncol = 3)  
+  ## Cowplot export at 4 X 8 inches
+  plot_grid (plot8b,plot8c,ncol = 3)  
   
   
 ##################################################################################
@@ -452,22 +490,19 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
     plot9b
     ggsave("9b_Flower_oe.pdf",width=7,height=6,units="in") #missing out outlier
     
-    
-
-
+  
 #models Fruit
     oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A)
     plot(oe_Fruit$Fruit_Oenothein_B,oe_Fruit$Seeds) #First order only
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
     plot(oe_Fruit$Fruit_Ox_Oenothein_A,oe_Fruit$Seeds)
     
-    qu_oeA_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Oenothein_B + 
-                             Fruit_Ox_Oenothein_A,data=oe_Fruit)
+    qu_oeA_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Ox_Oenothein_A,data=oe_Fruit)
     stepAIC(qu_oeA_Fruit,direction="both")
     qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Ox_Oenothein_A,data=oe_Fruit)
         Anova(qu_oeA_Fruit2,type = 3) # OeA significant
 
-    plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Ox_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
       geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
                                              breaks=c(25000,50000,75000,100000))+
       scale_x_continuous(name="Fruit Oenothein A (mg/g)")+ theme_classic()

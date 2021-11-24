@@ -9,7 +9,7 @@ library(ggplot2)
 library(lme4)
 
 ########
-#Individual Data
+# Test for normality of the response variable Seeds
 ########
 
 ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
