@@ -448,10 +448,9 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
     plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
     plot(oe_Leaf$Leaf_Ox_Oenothein_A,oe_Leaf$Seeds) #Could be second order
     
-    qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) +
-                                Leaf_Ox_Oenothein_A + I(Leaf_Ox_Oenothein_A^2),data=oe_Leaf)
-    stepAIC(qu_oeA_Leaf,direction="both") # Quadratic effects removed
-    qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + Leaf_Ox_Oenothein_A ,data=oe_Leaf)
+    qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2),data=oe_Leaf)
+    stepAIC(qu_oeA_Leaf,direction="both") # Keep both
+    qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) ,data=oe_Leaf)
     Anova(qu_A_Leaf,type = 3) # Nothing significant
     
     plot9a<-visreg(qu_A_Leaf, "Leaf_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -473,9 +472,8 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
    plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
     plot(oe_Flower$Flower_Ox_Oenothein_A,oe_Flower$Seeds) #First order only
     
-    qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2) + Flower_Oenothein_B 
-                            + Flower_Ox_Oenothein_A,data=oe_Flower)
-    stepAIC(qu_oeA_Flower,direction="both") #ox oenothein A removed
+    qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
+    stepAIC(qu_oeA_Flower,direction="both") #Both kept
     qu_A_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
     Anova(qu_A_Flower,type = 3) # OeA significant
     
@@ -497,12 +495,10 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
     plot(oe_Fruit$Fruit_Ox_Oenothein_A,oe_Fruit$Seeds)
     
-    qu_oeA_Fruit <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Ox_Oenothein_A,data=oe_Fruit)
-    stepAIC(qu_oeA_Fruit,direction="both")
-    qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A + Fruit_Ox_Oenothein_A,data=oe_Fruit)
+    qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A ,data=oe_Fruit)
         Anova(qu_oeA_Fruit2,type = 3) # OeA significant
 
-    plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Ox_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+    plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
       geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
                                              breaks=c(25000,50000,75000,100000))+
       scale_x_continuous(name="Fruit Oenothein A (mg/g)")+ theme_classic()
@@ -514,7 +510,7 @@ ggsave("1.Lat.pdf", width = 7, height = 6, units = "in")
     ggsave("9c_Fruit_oe.pdf",width=7,height=6,units="in") #missing out outlier
     
     ## Cowplot export at 4 X 11 inches
-    plot_grid(plot9a,plot9b,plot9c,ncol = 3)    
+    plot_grid(plot9b,plot9c,ncol = 3)    
 
     
 
