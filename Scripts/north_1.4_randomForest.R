@@ -33,13 +33,12 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
 ksr_trait <- ksr_m %>% select(Seeds,Flowering_Date,Water_Content,Growth_Rate,
                               Bolt_Date,SLA,Num_Trichomes,Leaf_Herb_Sept,bug,S.florida,M.brevivatella,
                               Leaf_Totphe,Flower_Totphe,Fruit_Totphe,Leaf_Oenothein_A,Flower_Oenothein_A,
-                              Fruit_Oenothein_A,Latitude,Longitude,Distance,MAT,RH,MAT_Distance)
+                              Fruit_Oenothein_A)
 #colnames(ksr_trait) <- c("Seeds", "Flowering_Date", "Leaf Toughness","Water Content", "Growth Rate",
 #                         "Bolt Date", "SLA", "Trichome Number", "Leaf Herbivory", "P. spumarius",
 #                         "S.florida", "M.brevivitella","Leaf Total Phenolics","Flower Total Phenlics",
 #                         "Fruit Total Phenolics", "Leaf Oenothein A", "Flower Oenothein A",
-#                         "Fruit Oenothein A", "Latitude","Longitude","Distance", "MAT","RH",
-#                         "Mat Distance")
+#                         "Fruit Oenothein A")
 
 ##################################################################################
 ##Part 2: Run random forest
@@ -58,11 +57,11 @@ rf1 <- randomForest(Seeds ~ .,
                     keep.inbag = T)
 
 # Create a variable importance plot
-randomForest::varImpPlot(x = rf1,
+plot1 <-randomForest::varImpPlot(x = rf1,
                          sort = T,
                          n.var = (ncol(ksr_trait) - 1),
                          main = "Variable Importance")
-
+## Export at 5.5 X 6
 
 ##################################################################################
 ##Plots
