@@ -57,6 +57,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
 #2. Does distance to common garden predict Seeds?
   plot(Distance,Seeds)
   qu_dist <- glm.nb (Seeds ~ Distance)
+  qu_dist
   Anova(qu_dist,type=3)
   
   #Make Plot
@@ -342,6 +343,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   stepAIC(qu_morpho,direction="both") # AIC scores lower without I(SLA^2)
   qu_morpho_2 <- glm.nb(Seeds ~ SLA + Water_Content + I(Water_Content^2) + 
                           Num_Trichomes + I(Num_Trichomes^2), data=morpho)
+  qu_morpho_2
   Anova(qu_morpho_2 ,type=3) #SLA not significant
 
   #Trichomes
@@ -425,8 +427,10 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   
 ################################
   #models for Leaf
-  qu_tphe_leaf <- glm.nb(Seeds ~ Leaf_Totphe + I(Leaf_Totphe^2), data=tphe_leaf)
-  stepAIC(qu_tphe_leaf,direction="both") #keep leaf and Leaf^2
+  qu_tphe_leaf2 <- glm.nb(Seeds ~ Leaf_Totphe + I(Leaf_Totphe^2), data=tphe_leaf)
+  stepAIC(qu_tphe_leaf2,direction="both") #keep remove Leaf^2
+  qu_tphe_leaf <- glm.nb(Seeds ~ Leaf_Totphe, data=tphe_leaf)
+  qu_tphe_leaf
   Anova(qu_tphe_leaf,type = 3) # leaf not significant
   
   #Leaf Total Phenolics
@@ -513,6 +517,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2),data=oe_Leaf)
     stepAIC(qu_oeA_Leaf,direction="both") # Keep both
     qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) ,data=oe_Leaf)
+    qu_A_Leaf
     Anova(qu_A_Leaf,type = 3) # Nothing significant
     
     plot9a<-visreg(qu_A_Leaf, "Leaf_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -563,6 +568,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     plot(oe_Fruit$Fruit_Ox_Oenothein_A,oe_Fruit$Seeds)
     
     qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A ,data=oe_Fruit)
+    qu_oeA_Fruit2
         Anova(qu_oeA_Fruit2,type = 3) # OeA significant
 
     plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -600,6 +606,8 @@ data_10 <- ksr_m %>% select(Seeds,Flowering_Date,Bolt_Date,Growth_Rate,Num_Trich
                             Flower_Totphe,Fruit_Totphe)
 data_10 <- as.data.frame(na.omit(data_10))
 
+#data_10 <- na.omit(data_10)
+
 qu_10 <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + Water_Content +
                     Flower_Totphe + Fruit_Totphe + Leaf_Herb_Sept + bug + S.florida + M.brevivatella +
                     I(Leaf_Herb_Sept^2) + I(bug^2) + I(Flowering_Date^2) + I(Bolt_Date^2) + I(Growth_Rate^2) +
@@ -609,6 +617,7 @@ stepAIC(qu_10,direction="both") #
 qu_all <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + Fruit_Totphe +
                     I(Flowering_Date^2) + I(Bolt_Date^2) + I(Growth_Rate^2) + I(Num_Trichomes^2)) +
                     I(Flower_Totphe^2)
+qu_all
   Anova(qu_all,type=3) # both highly significant
 
 
