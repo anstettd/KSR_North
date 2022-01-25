@@ -30,15 +30,8 @@ ipak(myPackages)
 ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
 
 #Subset data to just all trait variables
-ksr_trait <- ksr_m %>% select(Seeds,Flowering_Date,Water_Content,Growth_Rate,
-                              Bolt_Date,SLA,Num_Trichomes,Leaf_Herb_Sept,bug,S.florida,M.brevivatella,
-                              Leaf_Totphe,Flower_Totphe,Fruit_Totphe,Leaf_Oenothein_A,Flower_Oenothein_A,
-                              Fruit_Oenothein_A)
-#colnames(ksr_trait) <- c("Seeds", "Flowering_Date", "Leaf Toughness","Water Content", "Growth Rate",
-#                         "Bolt Date", "SLA", "Trichome Number", "Leaf Herbivory", "P. spumarius",
-#                         "S.florida", "M.brevivitella","Leaf Total Phenolics","Flower Total Phenlics",
-#                         "Fruit Total Phenolics", "Leaf Oenothein A", "Flower Oenothein A",
-#                         "Fruit Oenothein A")
+ksr_trait <- ksr_m %>% select(Seeds,Flowering_Date,Bolt_Date,Growth_Rate,Num_Trichomes,
+                              Water_Content,Flower_Totphe,Fruit_Totphe)
 
 ##################################################################################
 ##Part 2: Run random forest
