@@ -4,6 +4,9 @@
 ## Last updated Jan 7, 2022
 ##################################################################################
 
+# Clear environment
+rm(list = ls())
+
 #import libraries
 library(MASS)
 library(lmtest)
@@ -98,7 +101,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     geom_vline(xintercept= max_MAT)+
     geom_vline(xintercept= 7.9,linetype="dashed")
   plot3A
-  ggsave("3Single_fig/A.MAT.pdf", width = 7, height = 6, units = "in")
+  ggsave("Single_fig/3A.MAT.pdf", width = 7, height = 6, units = "in")
   
   #Get peak of RH ggplot regression line
   plot3b_peak <- visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE)
@@ -134,12 +137,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   Anova(qu_MAT_MSP_D,type=3) # MSP distance marginally significant, 
   visreg(qu_MAT_MSP_D, "MAT_Distance", scale="response", partial=TRUE, gg=TRUE)
   
-  #Get peak of RH ggplot regression line
-  plot4_peak <- visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE)
-  maxseed <- max(plot4_peak$fit$visregFit)
-  max_all <- plot4_peak$fit %>% filter(visregFit==maxseed)
-  max_MATd <- max_all[1,1]
-  
+
   #Mat distance alone
   qu_MAT_D<- glm.nb(Seeds ~ MAT_Distance + I(MAT_Distance^2), data=ksr_m)
   stepAIC(qu_MAT_D,direction="both") #Keep quadratic
@@ -157,6 +155,12 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   plot4
   
   ggsave("Single_fig/4.MAT_distance.pdf", width = 7, height = 6, units = "in")
+  
+  #Get peak of RH ggplot regression line
+  plot4_peak <- visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE)
+  maxseed <- max(plot4_peak$fit$visregFit)
+  max_all <- plot4_peak$fit %>% filter(visregFit==maxseed)
+  max_MATd <- max_all[1,1]
   
 ## Cowplot export at 7 X 9 inches
   plot_grid(plot1,plot2,plot3A,plot3B,ncol = 2)
@@ -232,34 +236,6 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   plot_grid(plot5a,plot5b,plot5c,ncol = 3)
   
 
-  
-  
-  #ommitted
-  # Do leaf herbiovry and xylem feeders impact seed number?
-  leaf_bug <- ksr_m %>% select(Pop,Seeds, Leaf_Herb_Sept, bug) #subset data
-  leaf_bug <- na.omit(leaf_bug) #remove NA rows
-  cor(leaf_bug$Leaf_Herb_Sept,leaf_bug$bug) #not correlated
-  
-  #Test leaf bug models
-  plot(Leaf_Herb_Sept,Seeds) # all could have quadratic components
-  plot(bug,Seeds)
-  qu_leaf_bug <- glm.nb(Seeds ~ Leaf_Herb_Sept + bug + I(Leaf_Herb_Sept^2) + I(bug^2), data=ksr_m)
-  stepAIC(qu_leaf_bug,direction="both") # bug only selected
-  qu_bug <- glm.nb(Seeds ~ bug + I(bug^2), data=ksr_m)
-  Anova(qu_leaf_bug,type=3) #Leaf herbivory not significant
-  Anova(qu_bug,type=3) #Bug and Bug^2 highly significant
-  #bug not having a negative effect no seed number
-  plot5a <- visreg(qu_bug, "bug", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
-    geom_point(size=1)+ scale_x_continuous(name="Philaenus spumarius")+
-    scale_y_continuous(name="Seed Number")+ theme_classic()
-  plot5a <- plot5a + theme(axis.text.x = element_text(size=13, face="bold"),
-                           axis.text.y = element_text(size=13,face="bold"),
-                           axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
-                           axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
-  plot5a
-  ggsave("Single_fig/5A.bug.pdf", width = 7, height = 6, units = "in")
-  
-  
 ##################################################################################
 #6. Does phenology predict success?
   pheno <- ksr_m %>% select(Pop, Seeds, Flowering_Date, Bolt_Date, Growth_Rate) #subset data
@@ -496,12 +472,12 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   
 ##################################################################################
 #9. Does detailed chemistry predict success? (Oe=Oenothein)
-    oenothein <- ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A, Leaf_Ox_Oenothein_A,
-                           Flower_Oenothein_B, Flower_Oenothein_A, Flower_Ox_Oenothein_A,
-                           Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A) #subset data
-    oenothein.matrix <- ksr_m %>% select(Leaf_Oenothein_B, Leaf_Oenothein_A, Leaf_Ox_Oenothein_A,
-                                Flower_Oenothein_B, Flower_Oenothein_A, Flower_Ox_Oenothein_A,
-                                Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A) #subset data
+    oenothein <- ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,
+                           Flower_Oenothein_B, Flower_Oenothein_A,
+                           Fruit_Oenothein_B, Fruit_Oenothein_A,) #subset data
+    oenothein.matrix <- ksr_m %>% select(Leaf_Oenothein_B, Leaf_Oenothein_A,
+                                Flower_Oenothein_B, Flower_Oenothein_A,
+                                Fruit_Oenothein_B, Fruit_Oenothein_A) #subset data
     oenothein <- na.omit(oenothein) #remove NA rows
     oenothein <- na.omit(oenothein.matrix) #remove NA rows
     oenothein_matrix <- as.matrix(oenothein.matrix)
@@ -512,7 +488,8 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,Leaf_Ox_Oenothein_A)
     plot(oe_Leaf$Leaf_Oenothein_A,oe_Leaf$Seeds) #Could be second order
     plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
-    plot(oe_Leaf$Leaf_Ox_Oenothein_A,oe_Leaf$Seeds) #Could be second order
+    
+    oe_Leaf <- na.omit(oe_Leaf)
     
     qu_oeA_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2),data=oe_Leaf)
     stepAIC(qu_oeA_Leaf,direction="both") # Keep both
@@ -537,7 +514,6 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A,Flower_Ox_Oenothein_A)
     plot(oe_Flower$Flower_Oenothein_A,oe_Flower$Seeds) #Could also be qudratic
    plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
-    plot(oe_Flower$Flower_Ox_Oenothein_A,oe_Flower$Seeds) #First order only
     
     qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
     stepAIC(qu_oeA_Flower,direction="both") #Both kept
@@ -565,7 +541,6 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A)
     plot(oe_Fruit$Fruit_Oenothein_B,oe_Fruit$Seeds) #First order only
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
-    plot(oe_Fruit$Fruit_Ox_Oenothein_A,oe_Fruit$Seeds)
     
     qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A ,data=oe_Fruit)
     qu_oeA_Fruit2
