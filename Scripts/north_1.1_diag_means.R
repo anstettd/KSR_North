@@ -2,6 +2,9 @@
 # 1.1 Diagnostics 
 #################
 
+# Clear environment
+rm(list = ls())
+
 library(MASS)
 library(AER)
 library(performance)
@@ -24,4 +27,14 @@ ggplot(data=ksr_m,aes(x=log(1+Seeds))) + geom_histogram(bins = 100)+theme_classi
 over.ksr <- glm(Seeds ~ ., data = ksr_m, family = poisson)
 dispersiontest(over.ksr) #Data over dispersed so use negative binomal
 
+
+#Assess normality of Fruit
+qqnorm(ksr_m$Fruit_no_damage) # ~ extreme left skew, negative binomial or poisson
+ggplot(data=ksr_m,aes(x=Fruit_no_damage)) + geom_histogram(bins=100)+theme_classic()
+qqnorm(log(1+ksr_m$Fruit_no_damage)) # ~ Extreme zero inflation
+ggplot(data=ksr_m,aes(x=log(1+Fruit_no_damage))) + geom_histogram(bins = 100)+theme_classic()
+
+#Test for overdispersion
+over.ksr_f <- glm(Fruit_no_damage ~ ., data = ksr_m, family = poisson)
+dispersiontest(over.ksr_f) #Data over dispersed so use negative binomal
 

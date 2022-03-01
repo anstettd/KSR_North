@@ -4,6 +4,9 @@
 # Test of normality with transformations
 #################
 
+# Clear environment
+rm(list = ls())
+
 library(tidyverse)
 library(Hmisc)
 
@@ -44,6 +47,8 @@ climate_lat <- climate_lat %>% filter(Pop!=659) %>% # Remove population from Ita
 ksr_i <- read.csv("Data/KSR_individual.csv", header=T) # Imports raw indvidual dataset
 ksr_i <- ksr_i %>% drop_na("Fruit") # Remove rows where fruit information is NA
 ksr_i <- ksr_i %>% mutate(Fruit_no_damage=Fruit-S.florida-0.18*M.brevivatella) # Calculate undamaged portions of fruits
+# -0.18*M.brevivatella is substracted from fruit total because this is the average number of fruits that one 
+# M.brevivitella larve is known to damage based on data provided by Marc Johnson. See fitness impact of Mompha.xls
 ksr_i$Fruit_no_damage[is.na(ksr_i$Fruit_no_damage)==TRUE]<-0 # Makes NA = 0 for above calculation
 ksr_length <- ksr_i %>% select(l1,l2,l3,l4,l5) ; ksr_Ml<-rowMeans(ksr_length,na.rm=T) # Average fruit length
 ksr_width <- ksr_i %>% select(d1,d2,d3,d4,d5) ; ksr_Mw<-rowMeans(ksr_width,na.rm=T) # Average fruit width
@@ -97,10 +102,11 @@ chm<-left_join(totphe_all,oe_all,by="Pop") # join total phenolics with oenothein
 chm <- chm %>% filter(Pop!=659) %>% # Remove population from Italy (European hybrid)
   filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
   filter(Pop!=877) # Remove,unclear where it is from.
-ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_no_damage,-Fruit_correction,
+ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_correction,
                              -Seeds_per_fruit) # Remove variables where mean is not needed
 #Take mean of each variable from ksr_i
-  ksr_seed <- ksr_i %>% group_by(Pop) %>% summarise(Seeds=mean(Seeds,na.rm=TRUE))  
+  ksr_seed <- ksr_i %>% group_by(Pop) %>% summarise(Seeds=mean(Seeds,na.rm=TRUE))
+  ksr_Fruit_no_damage <- ksr_i %>% group_by(Pop) %>% summarise(Fruit_no_damage=mean(Fruit_no_damage,na.rm=TRUE))
   ksr_fl <- ksr_i %>% group_by(Pop) %>% summarise(Flowering_Date=mean(Flowering_Date,na.rm=TRUE))
   ksr_lt <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_Toughness=mean(Leaf_Toughness,na.rm=TRUE)) 
   ksr_wc <- ksr_i %>% group_by(Pop) %>% summarise(Water_Content=mean(Water_Content,na.rm=TRUE))
@@ -118,7 +124,8 @@ ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_no_damage,-Fruit_correction
   ksr_mb <- ksr_i %>% group_by(Pop) %>% summarise(M.brevivatella=mean(M.brevivatella,na.rm=TRUE))
   
 #Join all means into one data frame
-  ksr_means_prep<-left_join(ksr_seed,ksr_fl,by="Pop") %>% 
+  ksr_means_prep<-left_join(ksr_Fruit_no_damage,ksr_seed,by="Pop") %>%
+    left_join(ksr_fl,by="Pop") %>%
     left_join(ksr_lt,by="Pop") %>%
     left_join(ksr_wc,by="Pop") %>%
     left_join(ksr_gr,by="Pop") %>%
