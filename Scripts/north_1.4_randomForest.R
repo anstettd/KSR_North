@@ -31,7 +31,8 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
 
 #Subset data to just all trait variables
 ksr_trait <- ksr_m %>% select(Seeds,Flowering_Date,Bolt_Date,Growth_Rate,Num_Trichomes,
-                              Water_Content,Flower_Totphe,Fruit_Totphe)
+                              Water_Content,Flower_Oenothein_A,Fruit_Oenothein_A,
+                              Flower_Totphe,Fruit_Totphe)
 
 ##################################################################################
 ##Part 2: Run random forest

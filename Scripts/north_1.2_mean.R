@@ -299,7 +299,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6a
-  ggsave("Single_fig/6a.Flowering.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/6a.Flowering.pdf", width = 7, height = 6, units = "in")
 #Bolt Date
   plot6b <- visreg(qu_pheno_2, "Bolt_Date", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
   geom_point(size=1)+ scale_x_continuous(name="Bolt Date")+
@@ -309,7 +309,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6b
-  ggsave("Single_fig/6b.bolt.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/6b.bolt.pdf", width = 7, height = 6, units = "in")
   
   #Quantile regression
   #Predict the 10th quantile of plant performance using specialist seed predators
@@ -321,7 +321,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
     scale_x_continuous(name="Bolt Date")+
     scale_y_continuous(name="Seed Number")+ pref_theme
   plot_5q3
-  ggsave("Single_fig/Quan3.bd.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/Quan3.bd.pdf", width = 7, height = 6, units = "in")
   
 #Growth Rate
   plot6c <- visreg(qu_pheno_2, "Growth_Rate", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -332,7 +332,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6c   
-  ggsave("Single_fig/6c.Growth_rate.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/6c.Growth_rate.pdf", width = 7, height = 6, units = "in")
   
   #Peak Numbers
   plot6_peak <- visreg(qu_pheno_2, "Flowering_Date", scale="response", partial=TRUE)
@@ -384,7 +384,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7a
-  ggsave("Single_fig/7a.Tricomes.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/7a.Tricomes.pdf", width = 7, height = 6, units = "in")
   
   
   
@@ -397,7 +397,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7b
-  ggsave("Single_fig/7b.wc.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/7b.wc.pdf", width = 7, height = 6, units = "in")
   
   
   #SLA
@@ -409,7 +409,7 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7c
-  ggsave("Single_fig/7c.SLA.pdf", width = 7, height = 6, units = "in")
+#  ggsave("Single_fig/7c.SLA.pdf", width = 7, height = 6, units = "in")
   
   #Peak Numbers
   plot7_peak <- visreg(qu_morpho_2, "Num_Trichomes", scale="response", partial=TRUE)
@@ -422,8 +422,8 @@ ggsave("Single_fig/1.Lat.pdf", width = 7, height = 6, units = "in")
   max_all[1,2]
   
   
-  ## Cowplot Fig 4 export at 7 X 10 inches
-  plot_grid(plot6a,plot7a,plot7b,plot7c,ncol = 2)  
+  ## Cowplot Fig 4 export at 10 X 5 inches
+  plot_grid(plot6a,plot6b,plot6c,plot7a,plot7b,plot7c,ncol = 3)  
   
 ##################################################################################
   #Chemistry Data
@@ -631,20 +631,20 @@ write.table(r_corr_table, file = "Data/corr_predictors.csv", sep = ",", row.name
 
 # model
 data_10 <- ksr_m %>% select(Seeds,Flowering_Date,Bolt_Date,Growth_Rate,Num_Trichomes,Water_Content,
-                            Flower_Totphe,Fruit_Totphe)
+                            Flower_Oenothein_A,Fruit_Oenothein_A)
 #data_10 <- as.data.frame(na.omit(data_10))
 
 data_10 <- na.omit(data_10)
 
 qu_10 <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + Water_Content +
-                    Flower_Totphe + Fruit_Totphe + I(Flowering_Date^2) + I(Growth_Rate^2) +
-                    I(Num_Trichomes^2) + I(Water_Content^2) + I(Flower_Totphe^2) + I(Fruit_Totphe^2), 
+                    Flower_Oenothein_A + Fruit_Oenothein_A + I(Flowering_Date^2) + I(Growth_Rate^2) +
+                    I(Num_Trichomes^2) + I(Water_Content^2) + I(Flower_Oenothein_A^2) + I(Fruit_Oenothein_A^2), 
                     data=data_10)
 stepAIC(qu_10,direction="both") # 
 
-qu_all <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Num_Trichomes + 
-                   Water_Content + Fruit_Totphe + I(Flowering_Date^2) + I(Num_Trichomes^2) + 
-                   I(Water_Content^2), data=data_10)
+qu_all <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + 
+                   Fruit_Oenothein_A + I(Flowering_Date^2) + I(Growth_Rate^2) + 
+                   I(Num_Trichomes^2), data=data_10)
 qu_all
   Anova(qu_all,type=3)
 
