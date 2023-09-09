@@ -57,7 +57,7 @@ plot_lat
   stepAIC(qu_geo,direction="both") # lowest AIC is Lat and Lat^2
   qu_lat <- lm (Seeds ~ Latitude + I(Latitude^2), data=ksr_m)
   summary(qu_lat)
-  Anova(qu_lat,type=2) # both highly significant
+  Anova(qu_lat,type=3) # both highly significant
   
   #Get peak of ggplot regression line
   plot1_peak <- visreg(qu_lat, "Latitude", scale="response", partial=TRUE)
@@ -89,7 +89,7 @@ plot_lat
   qu_dist <- glm.nb (Seeds ~ Distance)
   qu_dist
   summary(qu_dist)
-  Anova(qu_dist,type=2)
+  Anova(qu_dist,type=3)
   
   #Make Plot
   plot2<- visreg(qu_dist, "Distance", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -111,8 +111,7 @@ plot_lat
   qu_env <- glm.nb(Seeds ~ MAT + MSP + CMD + RH + I(MAT^2) + I(MSP^2) + I(CMD^2) + I(RH^2), data=ksr_m)
   stepAIC(qu_env,direction="both") # Keep MAT and RH
   qu_MAT_RH <- glm.nb(Seeds ~ MAT + RH + I(MAT^2) + I(RH^2), data=ksr_m)
-  summary(qu_MAT_RH)
-  Anova(qu_MAT_RH,type=2) #MAT significant, RH marginally significant
+  Anova(qu_MAT_RH,type=3) #MAT significant, RH marginally significant
   
   #Get peak of MAT ggplot regression line
   plot3_peak <- visreg(qu_MAT_RH, "MAT", scale="response", partial=TRUE)
@@ -163,15 +162,14 @@ plot_lat
   qu_envdist <- glm.nb(Seeds ~ MAT_Distance + MSP_Distance + CMD_Distance + RH_Distance +
                      I(MAT_Distance^2) + I(MSP_Distance^2) + I(CMD_Distance^2) + I(RH_Distance^2), data=ksr_m)
   stepAIC(qu_envdist,direction="both") # MSP_Distance + MAT_Distance^2 selected
-  qu_MAT_MSP_D <- glm.nb(Seeds ~ MSP_Distance + I(MAT_Distance^2))
-  summary(qu_MAT_MSP_D)
-  Anova(qu_MAT_MSP_D,type=2) # MSP distance marginally significant, 
+  qu_MAT_MSP_D <- glm.nb(Seeds ~ MSP_Distance + I(MAT_Distance^2)) 
+  Anova(qu_MAT_MSP_D,type=3) # MSP distance marginally significant, 
 
   
   #Mat distance alone
-  #qu_MAT_D<- glm.nb(Seeds ~ MAT_Distance + I(MAT_Distance^2), data=ksr_m)
-  #stepAIC(qu_MAT_D,direction="both") #Keep quadratic
-  #Anova(qu_MAT_D,type=2)
+  qu_MAT_D<- glm.nb(Seeds ~ MAT_Distance + I(MAT_Distance^2), data=ksr_m)
+  stepAIC(qu_MAT_D,direction="both") #Keep quadratic
+  Anova(qu_MAT_D,type=3)
   
   #Get peak of RH ggplot regression line
   plot4_peak <- visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE)
@@ -219,9 +217,8 @@ plot_lat
   qu_leaf_bug <- glm.nb(Seeds ~ Leaf_Herb_Sept + bug + I(Leaf_Herb_Sept^2) + I(bug^2), data=ksr_m)
   stepAIC(qu_leaf_bug,direction="both") # bug only selected
   qu_bug <- glm.nb(Seeds ~ bug + I(bug^2), data=ksr_m)
-  summary(qu_bug)
-  Anova(qu_bug,type=2) #Bug and Bug^2 highly significant
-  
+  Anova(qu_leaf_bug,type=3) #Leaf herbivory not significant
+  Anova(qu_bug,type=3) #Bug and Bug^2 highly significant
  #bug not having a negative effect no seed number
   plot5a <- visreg(qu_bug, "bug", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_x_continuous(name="P. spumarius Number")+
@@ -243,8 +240,7 @@ plot_lat
   plot(M.brevivatella,Seeds) # No evidence of quadratic model
   qu_sf_mb <- glm.nb(Seeds ~ S.florida + M.brevivatella, data=ksr_m)
   stepAIC(qu_sf_mb,direction="both") # Both seed predators selected
-  summary(qu_sf_mb)
-  Anova(qu_sf_mb,type=2) #S.florida significant, M.brevivitella marginally significant
+  Anova(qu_sf_mb,type=3) #S.florida significant, M.brevivietall marginally significant
   #plots
   #Not the most relevant explanation of the pattern
   plot5b <- visreg(qu_sf_mb, "S.florida", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -270,6 +266,28 @@ plot_lat
   ## Cowplot export at 4 X 11 inches
   plot_grid(plot5a,plot5b,plot5c,ncol = 3)
   
+  
+#Quantile regression
+  #Predict the 10th quantile of plant performance using specialist seed predators
+  quant10sf <- rq(Seeds ~ S.florida, data = ksr_m, tau = 0.10)
+  summary(quant10sf,se = "nid")
+  plot_5q1 <- ggplot(ksr_m, aes(S.florida,Seeds)) +
+    geom_point() + 
+    geom_abline(intercept=coef(quant10sf)[1], slope=coef(quant10sf)[2])+
+    scale_x_continuous(name="S. florida Damaged Fruits")+
+    scale_y_continuous(name="Seed Number")+ pref_theme
+  plot_5q1
+  ggsave("Single_fig/Quan1.mb.pdf", width = 7, height = 6, units = "in")
+  
+  quant10mb <- rq(Seeds ~ M.brevivatella, data = ksr_m, tau = 0.10)
+  summary(quant10mb,se = "nid")
+  plot_5q2 <- ggplot(ksr_m, aes(M.brevivatella,Seeds)) +
+    geom_point() + 
+    geom_abline(intercept=coef(quant10mb)[1], slope=coef(quant10mb)[2])+
+    scale_x_continuous(name="M. brevivitella Damaged Fruits")+
+    scale_y_continuous(name="Seed Number")+ pref_theme
+  plot_5q2
+  ggsave("Single_fig/Quan1.mb.pdf", width = 7, height = 6, units = "in")
 
 
 ##################################################################################
@@ -289,9 +307,7 @@ plot_lat
   stepAIC(qu_pheno,direction="both") # AIC scores lower without Bolt^2
   qu_pheno_2 <- glm.nb(Seeds ~ Flowering_Date + I(Flowering_Date^2) + Bolt_Date 
                        + Growth_Rate + I(Growth_Rate^2), data=pheno)
-  summary(qu_pheno_2)
-  Anova(qu_pheno_2,type=2) #Flowering Date and Growth Rate significant
-  
+  Anova(qu_pheno_2,type=3) #Flowering Date and Growth Rate significant
 #Graphs
   #Flowering Date
   plot6a <- visreg(qu_pheno_2, "Flowering_Date", scale="response", partial=TRUE, gg=TRUE , line=list(col="black")) +
@@ -313,6 +329,18 @@ plot_lat
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6b
 #  ggsave("Single_fig/6b.bolt.pdf", width = 7, height = 6, units = "in")
+  
+  #Quantile regression
+  #Predict the 10th quantile of plant performance using specialist seed predators
+  quant10bd <- rq(Seeds ~ Bolt_Date, data = ksr_m, tau = 0.1)
+  summary(quant10bd,se = "nid")
+  plot_5q3 <- ggplot(ksr_m, aes(Bolt_Date,Seeds)) +
+    geom_point() + 
+    geom_abline(intercept=coef(quant10bd)[1], slope=coef(quant10bd)[2])+
+    scale_x_continuous(name="Bolt Date")+
+    scale_y_continuous(name="Seed Number")+ pref_theme
+  plot_5q3
+#  ggsave("Single_fig/Quan3.bd.pdf", width = 7, height = 6, units = "in")
   
 #Growth Rate
   plot6c <- visreg(qu_pheno_2, "Growth_Rate", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -364,8 +392,7 @@ plot_lat
   qu_morpho_2 <- glm.nb(Seeds ~ SLA + Water_Content + I(Water_Content^2) + 
                           Num_Trichomes + I(Num_Trichomes^2), data=morpho)
   qu_morpho_2
-  summary(qu_morpho_2)
-  Anova(qu_morpho_2 ,type=2) #SLA not significant
+  Anova(qu_morpho_2 ,type=3) #SLA not significant
 
   #Trichomes
   plot7a <- visreg(qu_morpho_2, "Num_Trichomes", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -457,8 +484,7 @@ plot_lat
   stepAIC(qu_tphe_leaf2,direction="both") #keep remove Leaf^2
   qu_tphe_leaf <- glm.nb(Seeds ~ Leaf_Totphe, data=tphe_leaf)
   qu_tphe_leaf
-  summary(qu_tphe_leaf)
-  Anova(qu_tphe_leaf,type = 2) # leaf not significant
+  Anova(qu_tphe_leaf,type = 3) # leaf not significant
   
   #Leaf Total Phenolics
   plot8a<-visreg(qu_tphe_leaf, "Leaf_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -476,9 +502,8 @@ plot_lat
   #models for Flower 
   qu_tph_fl <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
   stepAIC(qu_tph_fl,direction="both") #remove flower_Totphe 1st order
-  qu_flr_2 <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr)
-  summary(qu_flr_2)
-  Anova(qu_flr_2 ,type = 2) #Not significant, qudratic marginal
+  qu_flr_2 <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
+  Anova(qu_flr_2 ,type = 3) #Not significant, qudratic marginal
 
 
   #Flower Total Phenolics
@@ -504,8 +529,7 @@ plot_lat
   qu_tph_r <- glm.nb(Seeds ~ Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
   stepAIC(qu_tph_r,direction="both") # Keep both main effect and quadratic effect
   qu_flr_3 <- glm.nb(Seeds ~ Fruit_Totphe + I(Fruit_Totphe^2), data=tphe_flr) 
-  summary(qu_flr_3)
-  Anova(qu_flr_3 ,type = 2) #
+  Anova(qu_flr_3 ,type = 3) #
   
   #Fruit Total Phenolics
   plot8c<-visreg(qu_flr_3, "Fruit_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -548,8 +572,7 @@ plot_lat
     stepAIC(qu_oeA_Leaf,direction="both") # Keep both
     qu_A_Leaf <- glm.nb(Seeds ~ Leaf_Oenothein_A + I(Leaf_Oenothein_A^2) ,data=oe_Leaf)
     qu_A_Leaf
-    summary(qu_A_Leaf)
-    Anova(qu_A_Leaf,type = 2) # Nothing significant
+    Anova(qu_A_Leaf,type = 3) # Nothing significant
     
     plot9a<-visreg(qu_A_Leaf, "Leaf_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
       geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
@@ -572,8 +595,7 @@ plot_lat
     qu_oeA_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
     stepAIC(qu_oeA_Flower,direction="both") #Both kept
     qu_A_Flower <- glm.nb(Seeds ~ Flower_Oenothein_A + I(Flower_Oenothein_A^2),data=oe_Flower)
-    summary(qu_A_Flower)
-    Anova(qu_A_Flower,type = 2) # OeA significant
+    Anova(qu_A_Flower,type = 3) # OeA significant
     
     plot9b<-visreg(qu_A_Flower, "Flower_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
       geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
@@ -599,8 +621,7 @@ plot_lat
     
     qu_oeA_Fruit2 <- glm.nb(Seeds ~ Fruit_Oenothein_A ,data=oe_Fruit)
     qu_oeA_Fruit2
-    summary(qu_oeA_Fruit2)
-        Anova(qu_oeA_Fruit2,type = 2) # OeA significant
+        Anova(qu_oeA_Fruit2,type = 3) # OeA significant
 
     plot9c<-visreg(qu_oeA_Fruit2, "Fruit_Oenothein_A", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
       geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
@@ -621,6 +642,36 @@ plot_lat
     
 
   
+
+##################################################################################
+# 10. What traits are most important in predicting seed number
+    
+corr_predict <- ksr_m %>% select(Flowering_Date,Bolt_Date,Growth_Rate,Num_Trichomes,Water_Content,
+                                Flower_Totphe,Fruit_Totphe,Flower_Oenothein_A,Fruit_Oenothein_A,
+                                Leaf_Herb_Sept, bug, S.florida, M.brevivatella)
+corr_table <- rcorr(as.matrix(corr_predict)) #Remove Oenothein data, correation too high with total phenolics
+r_corr_table <- as.data.frame(corr_table$r)
+write.table(r_corr_table, file = "Data/corr_predictors.csv", sep = ",", row.names = T) 
+
+# model
+data_10 <- ksr_m %>% select(Seeds,Flowering_Date,Bolt_Date,Growth_Rate,Num_Trichomes,Water_Content,
+                            Flower_Oenothein_A,Fruit_Oenothein_A)
+#data_10 <- as.data.frame(na.omit(data_10))
+
+data_10 <- na.omit(data_10)
+
+qu_10 <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + Water_Content +
+                    Flower_Oenothein_A + Fruit_Oenothein_A + I(Flowering_Date^2) + I(Growth_Rate^2) +
+                    I(Num_Trichomes^2) + I(Water_Content^2) + I(Flower_Oenothein_A^2) + I(Fruit_Oenothein_A^2), 
+                    data=data_10)
+stepAIC(qu_10,direction="both") # 
+
+qu_all <- glm.nb(Seeds ~ Flowering_Date + Bolt_Date + Growth_Rate + Num_Trichomes + 
+                   Fruit_Oenothein_A + I(Flowering_Date^2) + I(Growth_Rate^2) + 
+                   I(Num_Trichomes^2), data=data_10)
+qu_all
+  Anova(qu_all,type=3)
+
 
 
   

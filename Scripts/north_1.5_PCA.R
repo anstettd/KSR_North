@@ -127,10 +127,14 @@ plot(ksr_coor$PC1,ksr_coor$Seeds) # Unlikely 2nd order
 plot(ksr_coor$PC2,ksr_coor$Seeds) # No evidence of 2nd order
 
 qu_PC1 <- glm.nb(Seeds ~ PC1 ,data=ksr_coor)
-Anova(qu_PC1,type = 3)
+summary(qu_PC1)
+Anova(qu_PC1,type = 2)
+
 
 qu_PC2 <- glm.nb(Seeds ~ PC2 ,data=ksr_coor)
-Anova(qu_PC2,type = 3)
+summary(qu_PC2)
+Anova(qu_PC2,type = 2)
+
 
 
 # Nothing significant
