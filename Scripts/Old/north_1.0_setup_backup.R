@@ -44,14 +44,14 @@ climate_lat <- climate_lat %>% filter(Pop!=659) %>% # Remove population from Ita
   filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
   filter(Pop!=877) # Remove,unclear where this population is from.
 
-########################################################################################################
+########################################################
 #Individual dataset seed number calculations
-########################################################################################################
+########################################################
 ksr_i <- read.csv("Data/KSR_individual.csv", header=T) # Imports raw indvidual dataset
 ksr_i <- ksr_i %>% drop_na("Fruit") # Remove rows where fruit information is NA
 ksr_i <- ksr_i %>% mutate(Fruit_no_damage=Fruit-S.florida-0.18*M.brevivatella) # Calculate undamaged portions of fruits
-# -0.18*M.brevivatella is substracted from fruit total because this is the average proportion of damage of seeds that 
-# one M.brevivitella larve is known to damage based on data provided by Marc Johnson (personal communcation). 
+# -0.18*M.brevivatella is substracted from fruit total because this is the average number of fruits that one 
+# M.brevivitella larve is known to damage based on data provided by Marc Johnson. See fitness impact of Mompha.xls
 
 ksr_i$Fruit_no_damage[is.na(ksr_i$Fruit_no_damage)==TRUE]<-0 # Makes NA = 0 for above calculation
 ksr_length <- ksr_i %>% select(l1,l2,l3,l4,l5) ; ksr_Ml<-rowMeans(ksr_length,na.rm=T) # Average fruit length
@@ -68,13 +68,17 @@ ksr_i <- ksr_i %>% select(-l1,-l2,-l3,-l4,-l5,-d1,-d2,-d3,-d4,-d5,-Fruit,-F_leng
                           -Flower_Number,-Seeds_no_round) # Remove uneeded variables
 ksr_i <- ksr_i %>% filter(Pop!=659) %>% # Remove population from Italy (European hybrid)
   filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
-  filter(Pop!=877) # Remove population,unclear where it is from.
+  filter(Pop!=877) # Remove,unclear where it is from.
 ksr_i$Seeds[ksr_i$Seeds<0]<-0 #Nine cases of plants with <0 fruits assigned zero. Small L & W suggest aborted fruits
 
+#ksr_i <- left_join(ksr_i,climate_lat,by="Pop") #Add lat/climate to individual dataset
 
-########################################################################################################
+#write.csv(ksr_i,'Data/ksr_i.csv') #Export individual plants file
+
+
+############################
 #Total phenolics, oxidative capacity, oenothein 
-########################################################################################################
+############################
 totphe.dat <- read.csv("Data/totphe.csv", header=T) # Imports total phenolics data
 totphe.dat<-totphe.dat %>% select(-Control.sample.ID.)
 totphe_leaf <- totphe.dat %>% filter(Tissue=="Leaf") %>% select(-Tissue) %>% # filter per tissue
@@ -145,6 +149,10 @@ ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_correction,
 ksr_m<- left_join(climate_lat,ksr_means_prep,by="Pop") %>% left_join(chm,by="Pop")
 ksr_m[ksr_m=="NaN"]<-NA #Remove NaN and replace with NA
 
+#Rounding does not work, retain flowering time, seed bolt date as decimals
+#ksr_m$Seeds<-round(chm$Seeds,0) #Round seeds to whole numbers
+#ksr_m$Flowering_Date<-round(chm$Flowering_Date,0) #Round seeds to whole numbers
+#ksr_m$Bolt_Date<-round(chm$Bold_Date,0) #Round seeds to whole numbers
 
-write.csv(ksr_m,'Data/ksr_m.csv') #Export data file
+write.csv(ksr_m,'Data/ksr_m.csv') #Export neabs file again
 
