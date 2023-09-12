@@ -1,7 +1,7 @@
 ##################################################################################
 # Latitude vs traits while showing seeds as color on points
 ## Daniel Anstett
-## Last updated September, 2023
+## Last updated Sept 12, 2023
 ##################################################################################
 
 # Clear environment
@@ -160,16 +160,12 @@ lat_oeAFruit <- ggplot(na.omit(ksr_m), aes(x=Latitude, y=Fruit_Oenothein_A),fill
 lat_oeAFruit
 
 
-##### Cowplot
+##### Make Cowplot
 
 #Flower and bolt #Export portrait at 6 X 8
 plot_grid(lat_flower,lat_bolt, ncol=1) #Fig S3
 plot_grid(lat_oeAFruit,lat_TotpheFruit, ncol=1) #Fig S4
 plot_grid(lat_oeAFlower,lat_TotpheFlower, ncol=1) #Fig S5
-
-
-
-
 
 ##Include herbivores and traits all in Fig 3. Export at 10 X 5 inches
 plot_grid(lat_flower,lat_bolt,lat_growth,lat_tri,lat_water,lat_SLA,ncol = 3)

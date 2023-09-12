@@ -3,6 +3,7 @@
 # Carry out calculation to estimate seed number
 
 #Author: Daniel Anstett
+## Last updated Sept 12, 2023
 ########################################################################################################
 
 # Clear environment
@@ -15,15 +16,16 @@ library(Hmisc)
 #Lat, distance, climate
 ############################
 climate_lat <- read.csv("Data/climate_pop.csv", header=T) # Imports populations' climate dataset
+#Dataset downloaded from climate NA for all study populations
 climate_lat$MAR[2] <- climate_lat$MAR[1] # Replace error MAR values with near by population
 climate_lat$MAR[12] <- climate_lat$MAR[18] 
 climate_lat <- climate_lat %>% select(Pop,Latitude,Longitude,Distance, #Organize variables
-                                      MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/sun
-                                      MAP,MSP,CMD,RH) # Precipt/moiusture
+                                      MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/solar radiation variables
+                                      MAP,MSP,CMD,RH) # precipitation and moisture variables
 #Correlate all climate
 
-climate_matrix <-climate_lat %>% select(MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/sun
-                                        MAP,MSP,CMD,RH) # Precipt/moiusture
+climate_matrix <-climate_lat %>% select(MAT,MWMT,MCMT,TD,NFFD,DD18,MAR, # Temperature/solar radiation variables
+                                        MAP,MSP,CMD,RH) # precipitation and moisture variables
 climate_matrix <- as.matrix(climate_matrix)
 rcorr(climate_matrix) # MAT highly correlated to everything except MSP, CMD, RH.
 climate_lat <- climate_lat %>% select(Pop,Latitude,Longitude,Distance,MAT,MSP,CMD,RH) # Retain only MAT, MSP, CMD, RH
@@ -47,7 +49,7 @@ climate_lat <- climate_lat %>% filter(Pop!=659) %>% # Remove population from Ita
 ########################################################################################################
 #Individual dataset seed number calculations
 ########################################################################################################
-ksr_i <- read.csv("Data/KSR_individual.csv", header=T) # Imports raw indvidual dataset
+ksr_i <- read.csv("Data/KSR_individual_final.csv", header=T) # Imports raw indvidual dataset
 ksr_i <- ksr_i %>% drop_na("Fruit") # Remove rows where fruit information is NA
 ksr_i <- ksr_i %>% mutate(Fruit_no_damage=Fruit-S.florida-0.18*M.brevivatella) # Calculate undamaged portions of fruits
 # -0.18*M.brevivatella is substracted from fruit total because this is the average proportion of damage of seeds that 
@@ -76,7 +78,7 @@ ksr_i$Seeds[ksr_i$Seeds<0]<-0 #Nine cases of plants with <0 fruits assigned zero
 #Total phenolics, oxidative capacity, oenothein 
 ########################################################################################################
 totphe.dat <- read.csv("Data/totphe.csv", header=T) # Imports total phenolics data
-totphe.dat<-totphe.dat %>% select(-Control.sample.ID.)
+totphe.dat<-totphe.dat %>% select(-Control.sample.ID.) #remove asscending numerical variable
 totphe_leaf <- totphe.dat %>% filter(Tissue=="Leaf") %>% select(-Tissue) %>% # filter per tissue
   rename (Leaf_Totphe=totphe,Leaf_pH_10=pH_10) #rename columns to include tissue name 
 totphe_flower <- totphe.dat %>% filter(Tissue=="Flower") %>% select(-Tissue)%>% 
@@ -86,15 +88,15 @@ totphe_fruit <- totphe.dat %>% filter(Tissue=="Fruit") %>% select(-Tissue)%>%
 totphe_all <- left_join(totphe_leaf,totphe_flower,by="Pop") %>% left_join(totphe_fruit,by="Pop") #generate total phenolics dataframe
 
 
-oe <- read.csv("Data/oe.csv", header=T) # Imports Oenothein data
-oe<-oe %>% select(-Turku_ID)
+oe <- read.csv("Data/oe_final.csv", header=T) # Imports Oenothein data
+oe<-oe %>% select(-Turku_ID) #rem
 oe_leaf <- oe %>% filter(Tissue=="Leaf") %>% select(-Tissue) %>% # filter per tissue
-  rename (Leaf_Oenothein_B=Oenothein_B,Leaf_Oenothein_A=Oenothein_A,Leaf_Ox_Oenothein_A=Oxidized_Oenothein_A) #rename columns 
+  rename (Leaf_Oenothein_B=Oenothein_B,Leaf_Oenothein_A=Oenothein_A) #rename columns 
 oe_flower <- oe %>% filter(Tissue=="Flower") %>% select(-Tissue)%>%
-  rename (Flower_Oenothein_B=Oenothein_B,Flower_Oenothein_A=Oenothein_A,Flower_Ox_Oenothein_A=Oxidized_Oenothein_A) %>% #rename columns 
+  rename (Flower_Oenothein_B=Oenothein_B,Flower_Oenothein_A=Oenothein_A) %>% #rename columns 
   filter(Pop!=700) #Remove outlier pop (issue with chemistry)
 oe_fruit <- oe %>% filter(Tissue=="Fruit") %>% select(-Tissue)%>%
-  rename (Fruit_Oenothein_B=Oenothein_B,Fruit_Oenothein_A=Oenothein_A,Fruit_Ox_Oenothein_A=Oxidized_Oenothein_A) %>% #rename columns 
+  rename (Fruit_Oenothein_B=Oenothein_B,Fruit_Oenothein_A=Oenothein_A) %>% #rename columns 
   filter(Pop!=709) #Remove outlier pop (issue with chemistry)
 oe_all <- left_join(oe_leaf,oe_flower,by="Pop") %>% left_join(oe_fruit,by="Pop") #generate oenothein dataframe
 
@@ -102,7 +104,7 @@ chm<-left_join(totphe_all,oe_all,by="Pop") # join total phenolics with oenothein
 chm <- chm %>% filter(Pop!=659) %>% # Remove population from Italy (European hybrid)
   filter(Pop!=661) %>% # Not correct species (oenothera oakesiana)
   filter(Pop!=877) # Remove,unclear where it is from.
-ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_correction,
+ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-Fruit_correction,
                              -Seeds_per_fruit) # Remove variables where mean is not needed
 #Take mean of each variable from ksr_i
   ksr_seed <- ksr_i %>% group_by(Pop) %>% summarise(Seeds=mean(Seeds,na.rm=TRUE))
@@ -113,13 +115,10 @@ ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_correction,
   ksr_gr <- ksr_i %>% group_by(Pop) %>% summarise(Growth_Rate=mean(Growth_Rate,na.rm=TRUE))
   ksr_bd <- ksr_i %>% group_by(Pop) %>% summarise(Bolt_Date=mean(Bolt_Date,na.rm=TRUE))
   ksr_SLA <- ksr_i %>% group_by(Pop) %>% summarise(SLA=mean(SLA,na.rm=TRUE))
-  ksr_am <- ksr_i %>% group_by(Pop) %>% summarise(Above_mass=mean(Above_mass,na.rm=TRUE)) 
-  ksr_bm <- ksr_i %>% group_by(Pop) %>% summarise(Below_mass=mean(Below_mass,na.rm=TRUE))
   ksr_tri <- ksr_i %>% group_by(Pop) %>% summarise(Num_Trichomes=mean(Num_Trichomes,na.rm=TRUE))
   ksr_lhs <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_Herb_Sept=mean(Leaf_Herb_Sept,na.rm=TRUE))
   ksr_bug <- ksr_i %>% group_by(Pop) %>% summarise(bug=mean(bug,na.rm=TRUE))
   ksr_h <- ksr_i %>% group_by(Pop) %>% summarise(Hight=mean(Hight,na.rm=TRUE))
-  ksr_lhj <- ksr_i %>% group_by(Pop) %>% summarise(Leaf_herb_July=mean(Leaf_herb_July,na.rm=TRUE)) 
   ksr_sf <- ksr_i %>% group_by(Pop) %>% summarise(S.florida=mean(S.florida,na.rm=TRUE)) 
   ksr_mb <- ksr_i %>% group_by(Pop) %>% summarise(M.brevivatella=mean(M.brevivatella,na.rm=TRUE))
   
@@ -131,13 +130,10 @@ ksr_i <- ksr_i %>% select(-Plant.ID,-Block,-X,-Fruit_correction,
     left_join(ksr_gr,by="Pop") %>%
     left_join(ksr_bd,by="Pop") %>%
     left_join(ksr_SLA,by="Pop") %>%
-    left_join(ksr_am,by="Pop") %>%
-    left_join(ksr_bm,by="Pop") %>%
     left_join(ksr_tri,by="Pop") %>%
     left_join(ksr_lhs,by="Pop") %>%
     left_join(ksr_bug,by="Pop") %>%
     left_join(ksr_h,by="Pop") %>%
-    left_join(ksr_lhj,by="Pop") %>%
     left_join(ksr_sf,by="Pop") %>%
     left_join(ksr_mb,by="Pop")
   

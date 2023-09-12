@@ -25,7 +25,7 @@ ggplot(data=ksr_m,aes(x=log(1+Seeds))) + geom_histogram(bins = 100)+theme_classi
 
 #Test for overdispersion
 over.ksr <- glm(Seeds ~ ., data = ksr_m, family = poisson)
-dispersiontest(over.ksr) #Data over dispersed so use negative binomal
+dispersiontest(over.ksr) #Data over dispersed so use negative binomial distribution
 
 
 #Assess normality of Fruit
@@ -36,5 +36,5 @@ ggplot(data=ksr_m,aes(x=log(1+Fruit_no_damage))) + geom_histogram(bins = 100)+th
 
 #Test for overdispersion
 over.ksr_f <- glm(Fruit_no_damage ~ ., data = ksr_m, family = poisson)
-dispersiontest(over.ksr_f) #Data over dispersed so use negative binomal
+dispersiontest(over.ksr_f) #Data over dispersed so use negative binoimal distribution
 

@@ -69,7 +69,7 @@ st_bbox(can_USA)
 #bbox_map <- st_bbox(c(xmin = -137, xmax = -52.6, ymax = 54, ymin = 24.5), EPSG4326)
 #bbox_lambert <- st_bbox(c(xmin = -2306298, ymin = -152314, xmax = 2979277, ymax = 2711094), lambert)
 
-
+#Make Map
 tmap_mode("plot")
 #tmap_mode("view")
 fig1 <- tm_shape(can_USA)+

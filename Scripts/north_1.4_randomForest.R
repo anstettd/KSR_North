@@ -1,7 +1,6 @@
 ##################################################################################
 # Analyses of what traits best predict Seed Number
 ## Daniel Anstett
-## Using randomForest code written by Nick J Lyon 
 ## Last updated Jan 19, 2022
 ##################################################################################
 
@@ -57,13 +56,7 @@ plot1 <-randomForest::varImpPlot(x = rf1,
                          main = "Variable Importance")
 ## Export at 5.5 X 6
 
-##################################################################################
-##Plots
 
-# Set custom aesthetic
-pref_theme <- theme_classic() + theme(axis.text = element_text(size = 13),
-                                      axis.title = element_text(size = 15),
-                                      legend.position = "none")
 
 
 
