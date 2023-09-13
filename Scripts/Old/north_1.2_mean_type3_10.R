@@ -20,7 +20,7 @@ library(quantreg)
 library(RColorBrewer)
 
 #import data
-ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
+ksr_m <- read.csv("Data/ksr_m_old.csv", header=T) # Imports individual dataset
 attach(ksr_m)
 
 

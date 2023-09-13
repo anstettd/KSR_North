@@ -16,11 +16,11 @@ library(Hmisc)
 library(car)
 library(nlme)
 library(cowplot)
-library(quantreg)
 library(RColorBrewer)
 
 #import data
 ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
+attach(ksr_m)
 
 
 ##################################################################################
@@ -145,6 +145,10 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
   summary(qu_MAT_MSP_D)
   Anova(qu_MAT_MSP_D,type=2) # MSP distance marginally significant, 
 
+  #Mat distance alone
+  qu_MAT_D<- glm.nb(Seeds ~ MAT_Distance + I(MAT_Distance^2), data=ksr_m)
+  stepAIC(qu_MAT_D,direction="both") #Keep quadratic
+  Anova(qu_MAT_D,type=3)
   
   #Get peak of RH ggplot regression line
   plot4_peak <- visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE)
@@ -204,7 +208,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot5a
-  ggsave("Single_fig/5A.bug.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/5A.bug.pdf", width = 7, height = 6, units = "in")
   
   #c. Does seed predation impact seed number?
   sf_mb <- ksr_m %>% select(Pop,Seeds, S.florida, M.brevivatella) #subset data
@@ -218,11 +222,12 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
   stepAIC(qu_sf_mb,direction="both") # Both seed predators selected
   summary(qu_sf_mb)
   Anova(qu_sf_mb,type=2) #S.florida significant, M.brevivitella marginally significant
+  qu_sf <- glm.nb(Seeds ~ S.florida, data=ksr_m) 
   
-  #Plot M.brevivitella against seed number
-  plot5b <- visreg(qu_sf_mb, "S.florida", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
+  #Plot S. florida against seed number
+  plot5b <- visreg(qu_sf, "S.florida", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_x_continuous(name="S. florida Damanged Fruits")+
-    scale_y_continuous(name="Seed Number",limits=c(0,105000))+ theme_classic()
+    scale_y_continuous(name="Seed Number",limits=c(0,100000))+ theme_classic()
   plot5b <- plot5b + theme(axis.text.x = element_text(size=13, face="bold"),
                            axis.text.y = element_text(size=13,face="bold"),
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
@@ -230,10 +235,10 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
   plot5b
   #ggsave("Single_fig/5B.sf.pdf", width = 7, height = 6, units = "in")
   
-  #Plot S. florida against seed number
+  #Plot M.brevivitella against seed number
   plot5c <- visreg(qu_sf_mb, "M.brevivatella", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_x_continuous(name="M. brevivitella Damanged Fruits")+
-    scale_y_continuous(name="Seed Number",limits=c(0,105000))+ theme_classic()
+    scale_y_continuous(name="Seed Number",limits=c(0,100000))+ theme_classic()
   plot5c <- plot5c + theme(axis.text.x = element_text(size=13, face="bold"),
                            axis.text.y = element_text(size=13,face="bold"),
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold.italic"),
@@ -314,10 +319,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
 ## Cowplot export at 4 X 11 inches
   plot_grid(plot6b,plot6c)  
   
-## Quantile reg Cowplot export at 4 X 11 inches
-  plot_grid(plot_5q1,plot_5q2,plot_5q3,ncol = 3)
-  plot_grid(plot_5q1,plot_5q3,ncol = 2)
-  
+
     
     
     
@@ -419,7 +421,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
   tphe_leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Totphe)
   tphe_leaf<- na.omit(tphe_leaf) #remove NA rows, leaf separate
   tphe_flr<-ksr_m %>% select(Pop, Seeds, Flower_Totphe, Fruit_Totphe)
-  tphe_flr<- na.omit(tphe_flr) #remove NA rows, leaf separate
+  #tphe_flr<- na.omit(tphe_flr) #remove NA rows, leaf separate
   
   plot(tphe_leaf$Leaf_Totphe,tphe_leaf$Seeds) #Could be quadratic
   plot(tphe_flr$Flower_Totphe,tphe_flr$Seeds)
@@ -429,7 +431,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
 ################################
   #models for leaf phenolics
   qu_tphe_leaf2 <- glm.nb(Seeds ~ Leaf_Totphe + I(Leaf_Totphe^2), data=tphe_leaf)  # run glm
-  stepAIC(qu_tphe_leaf2,direction="both") #keep remove Leaf^2
+  stepAIC(qu_tphe_leaf2,direction="both") #remove Leaf^2
   qu_tphe_leaf <- glm.nb(Seeds ~ Leaf_Totphe, data=tphe_leaf) # rerun glm
   qu_tphe_leaf
   summary(qu_tphe_leaf)
@@ -445,7 +447,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot8a
-  ggsave("Single_fig/8a_Leaf_totphe.pdf",width=7,height=6,units="in")
+  #ggsave("Single_fig/8a_Leaf_totphe.pdf",width=7,height=6,units="in")
 
 ################################ 
   #models for flower phenolics
@@ -453,20 +455,22 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
   stepAIC(qu_tph_fl,direction="both") #remove flower_Totphe 1st order
   qu_flr_2 <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
   summary(qu_flr_2)
-  Anova(qu_flr_2 ,type = 2) #Not significant, qudratic marginal
+  Anova(qu_flr_2 ,type = 2) #Not significant, quadratic marginal
 
 
   #Plot Flower Total Phenolics
   plot8b<-visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
     geom_point(size=1)+ scale_y_continuous(name="Seed Number", limits=c(0,100000),
                                            breaks=c(25000,50000,75000,100000))+
-    scale_x_continuous(name="Flower Total Phenolics (mg/g)",limits = c(20,105),breaks=c(20,40,60,80,100))+ theme_classic()
+    scale_x_continuous(name="Flower Total Phenolics (mg/g)")+ theme_classic()
+                       
+                       #,limits = c(20,105),breaks=c(20,40,60,80,100))
   plot8b <- plot8b +   theme(axis.text.x = element_text(size=13, face="bold"),
                              axis.text.y = element_text(size=13,face="bold"),
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot8b
-  ggsave("Single_fig/8b_Flower_totphe.pdf",width=7,height=6,units="in")
+  #ggsave("Single_fig/8b_Flower_totphe.pdf",width=7,height=6,units="in")
   
   #Peak Numbers
   plot7_peak <- visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE)
@@ -492,17 +496,17 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot8c
-  ggsave("Single_fig/8c_Fruit_totphe.pdf",width=7,height=6,units="in")
+  #ggsave("Single_fig/8c_Fruit_totphe.pdf",width=7,height=6,units="in")
   
   ## Cowplot export at 4 X 8 inches
-  plot_grid (plot8b,plot8c,ncol = 3)  
+  plot_grid (plot8b,plot8c,ncol = 2)  
   
   
 ##################################################################################
 #9. Does detailed chemistry predict success? (Oe=Oenothein)
     oenothein <- ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,
                            Flower_Oenothein_B, Flower_Oenothein_A,
-                           Fruit_Oenothein_B, Fruit_Oenothein_A,) #subset data
+                           Fruit_Oenothein_B, Fruit_Oenothein_A) #subset data
     oenothein.matrix <- ksr_m %>% select(Leaf_Oenothein_B, Leaf_Oenothein_A,
                                 Flower_Oenothein_B, Flower_Oenothein_A,
                                 Fruit_Oenothein_B, Fruit_Oenothein_A) #subset data
@@ -513,7 +517,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
         write.csv(rcorr.oe$r,"oe_rcorr.csv", row.names = TRUE)
 
 #models for leaf oenothein A
-    oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,Leaf_Ox_Oenothein_A)
+    oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A)
     plot(oe_Leaf$Leaf_Oenothein_A,oe_Leaf$Seeds) #Could be second order
     plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
     
@@ -540,7 +544,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
     
     
 #model for flower oenothein A
-    oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A,Flower_Ox_Oenothein_A)
+    oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A)
     plot(oe_Flower$Flower_Oenothein_A,oe_Flower$Seeds) #Could also be qudratic
    plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
     
@@ -569,7 +573,7 @@ ksr_m <- read.csv("Data/ksr_m.csv", header=T) # Imports individual dataset
     max_all[1,1]
     
 #model for fruit oenothein A
-    oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A,Fruit_Ox_Oenothein_A)
+    oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A)
     plot(oe_Fruit$Fruit_Oenothein_B,oe_Fruit$Seeds) #First order only
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
     

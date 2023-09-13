@@ -77,18 +77,11 @@ ksr_i$Seeds[ksr_i$Seeds<0]<-0 #Nine cases of plants with <0 fruits assigned zero
 ########################################################################################################
 #Total phenolics, oxidative capacity, oenothein 
 ########################################################################################################
-totphe.dat <- read.csv("Data/totphe.csv", header=T) # Imports total phenolics data
-totphe.dat<-totphe.dat %>% select(-Control.sample.ID.) #remove asscending numerical variable
-totphe_leaf <- totphe.dat %>% filter(Tissue=="Leaf") %>% select(-Tissue) %>% # filter per tissue
-  rename (Leaf_Totphe=totphe,Leaf_pH_10=pH_10) #rename columns to include tissue name 
-totphe_flower <- totphe.dat %>% filter(Tissue=="Flower") %>% select(-Tissue)%>% 
-  rename (Flower_Totphe=totphe,Flower_pH_10=pH_10)
-totphe_fruit <- totphe.dat %>% filter(Tissue=="Fruit") %>% select(-Tissue)%>% 
-  rename (Fruit_Totphe=totphe,Fruit_pH_10=pH_10)
-totphe_all <- left_join(totphe_leaf,totphe_flower,by="Pop") %>% left_join(totphe_fruit,by="Pop") #generate total phenolics dataframe
+# Imports total phenolics data
+totphe_all <- read.csv("Data/totphe_final.csv", header=T) 
 
-
-oe <- read.csv("Data/oe_final.csv", header=T) # Imports Oenothein data
+# Import oenothein data
+oe <- read.csv("Data/oe_final.csv", header=T) 
 oe<-oe %>% select(-Turku_ID) #rem
 oe_leaf <- oe %>% filter(Tissue=="Leaf") %>% select(-Tissue) %>% # filter per tissue
   rename (Leaf_Oenothein_B=Oenothein_B,Leaf_Oenothein_A=Oenothein_A) #rename columns 
