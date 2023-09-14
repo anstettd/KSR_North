@@ -24,7 +24,7 @@ qqnorm(log(1+ksr_m$Seeds)) # ~ Extreme zero inflation
 ggplot(data=ksr_m,aes(x=log(1+Seeds))) + geom_histogram(bins = 100)+theme_classic()
 
 #Test for overdispersion
-over.ksr <- glm(Seeds ~ ., data = ksr_m, family = poisson)
+over.ksr <- glm(Seeds ~ Flowering_Date, data = ksr_m, family = poisson)
 dispersiontest(over.ksr) #Data over dispersed so use negative binomial distribution
 
 
@@ -35,6 +35,6 @@ qqnorm(log(1+ksr_m$Fruit_no_damage)) # ~ Extreme zero inflation
 ggplot(data=ksr_m,aes(x=log(1+Fruit_no_damage))) + geom_histogram(bins = 100)+theme_classic()
 
 #Test for overdispersion
-over.ksr_f <- glm(Fruit_no_damage ~ ., data = ksr_m, family = poisson)
+over.ksr_f <- glm(Fruit_no_damage ~ Flowering_Date, data = ksr_m, family = poisson)
 dispersiontest(over.ksr_f) #Data over dispersed so use negative binoimal distribution
 

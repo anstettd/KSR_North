@@ -110,13 +110,14 @@ attach(ksr_m)
     geom_vline(xintercept= max_MAT)+
     geom_vline(xintercept= 7.9,linetype="dashed")
   plot3A
- # ggsave("Single_fig/3A.MAT.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/3A.MAT.pdf", width = 7, height = 6, units = "in")
   
   #Get peak of RH ggplot regression line
   plot3b_peak <- visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE)
   maxseed <- max(plot3b_peak$fit$visregFit)
   max_all <- plot3b_peak$fit %>% filter(visregFit==maxseed)
   max_RH <- max_all[1,2]
+  max_RH - 69 #Distance from peak RH to RH at common garden
   
   #Make RH plot prediting seed number 
   plot3B <-visreg(qu_MAT_RH, "RH", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -129,7 +130,7 @@ attach(ksr_m)
     geom_vline(xintercept= max_RH)+
     geom_vline(xintercept= 69,linetype="dashed")
   plot3B
- # ggsave("Single_fig/3B.RH.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/3B.RH.pdf", width = 7, height = 6, units = "in")
   
   
 ##################################################################################
@@ -140,7 +141,7 @@ attach(ksr_m)
   plot(RH_Distance,Seeds)
   qu_envdist <- glm.nb(Seeds ~ MAT_Distance + MSP_Distance + CMD_Distance + RH_Distance +
                      I(MAT_Distance^2) + I(MSP_Distance^2) + I(CMD_Distance^2) + I(RH_Distance^2), data=ksr_m) #run glm
-  stepAIC(qu_envdist,direction="both") #MSP_Distance + MAT_Distance^2 selected
+  stepAIC(qu_envdist,direction="both") #MSP_Distance + MAT_Distance^2 dplyr::selected
   qu_MAT_MSP_D <- glm.nb(Seeds ~ MSP_Distance + I(MAT_Distance^2)) # Run reduced model
   summary(qu_MAT_MSP_D)
   Anova(qu_MAT_MSP_D,type=2) # MSP distance marginally significant, 
@@ -148,13 +149,16 @@ attach(ksr_m)
   #Mat distance alone
   qu_MAT_D<- glm.nb(Seeds ~ MAT_Distance + I(MAT_Distance^2), data=ksr_m)
   stepAIC(qu_MAT_D,direction="both") #Keep quadratic
-  Anova(qu_MAT_D,type=3)
+  summary(qu_MAT_D)
+  Anova(qu_MAT_D,type=2)
+  
   
   #Get peak of RH ggplot regression line
   plot4_peak <- visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE)
   maxseed <- max(plot4_peak$fit$visregFit)
   max_all <- plot4_peak$fit %>% filter(visregFit==maxseed)
   max_MATd <- max_all[1,1]
+  max_MATd 
   
   #Make plot of MAT_distance predicting seed number
   plot4 <-visreg(qu_MAT_D, "MAT_Distance", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -168,7 +172,7 @@ attach(ksr_m)
     geom_vline(xintercept= 0,linetype="dashed")
   plot4
   
-  #ggsave("Single_fig/4.MAT_distance.pdf", width = 7, height = 6, units = "in")
+  ggsave("Single_fig/4.MAT_distance.pdf", width = 7, height = 6, units = "in")
   
 
   
@@ -186,7 +190,7 @@ attach(ksr_m)
 #5. Does herb impact predict success?
 
   #a. Do leaf herbiovry and xylem feeders impact seed number?
-  leaf_bug <- ksr_m %>% select(Pop,Seeds,Leaf_Herb_Sept,bug) #subset data
+  leaf_bug <- ksr_m %>% dplyr::select(Pop,Seeds,Leaf_Herb_Sept,bug) #subset data
   leaf_bug <- na.omit(leaf_bug) #remove NA rows
   cor(leaf_bug$Leaf_Herb_Sept,leaf_bug$bug) #not correlated
   
@@ -194,7 +198,7 @@ attach(ksr_m)
   plot(Leaf_Herb_Sept,Seeds) # all could have quadratic components
   plot(bug,Seeds)
   qu_leaf_bug <- glm.nb(Seeds ~ Leaf_Herb_Sept + bug + I(Leaf_Herb_Sept^2) + I(bug^2), data=ksr_m) #run glm
-  stepAIC(qu_leaf_bug,direction="both") # bug only selected
+  stepAIC(qu_leaf_bug,direction="both") # bug only dplyr::selected
   qu_bug <- glm.nb(Seeds ~ bug + I(bug^2), data=ksr_m) #run reduced glm
   summary(qu_bug)
   Anova(qu_bug,type=2) #Bug and Bug^2 highly significant
@@ -211,7 +215,7 @@ attach(ksr_m)
   #ggsave("Single_fig/5A.bug.pdf", width = 7, height = 6, units = "in")
   
   #c. Does seed predation impact seed number?
-  sf_mb <- ksr_m %>% select(Pop,Seeds, S.florida, M.brevivatella) #subset data
+  sf_mb <- ksr_m %>% dplyr::select(Pop,Seeds, S.florida, M.brevivatella) #subset data
   sf_mb <- na.omit(sf_mb) #remove NA rows
   cor(sf_mb$S.florida,sf_mb$M.brevivatella) #not correlated
   
@@ -219,7 +223,7 @@ attach(ksr_m)
   plot(S.florida,Seeds) # No evidence of quadratic model
   plot(M.brevivatella,Seeds) # No evidence of quadratic model
   qu_sf_mb <- glm.nb(Seeds ~ S.florida + M.brevivatella, data=ksr_m) #run model
-  stepAIC(qu_sf_mb,direction="both") # Both seed predators selected
+  stepAIC(qu_sf_mb,direction="both") # Both seed predators dplyr::selected
   summary(qu_sf_mb)
   Anova(qu_sf_mb,type=2) #S.florida significant, M.brevivitella marginally significant
   qu_sf <- glm.nb(Seeds ~ S.florida, data=ksr_m) 
@@ -253,7 +257,7 @@ attach(ksr_m)
 
 ##################################################################################
 #6. Does phenology predict success?
-  pheno <- ksr_m %>% select(Pop, Seeds, Flowering_Date, Bolt_Date, Growth_Rate) #subset data
+  pheno <- ksr_m %>% dplyr::select(Pop, Seeds, Flowering_Date, Bolt_Date, Growth_Rate) #subset data
   pheno <- na.omit(pheno) #remove NA rows
   pheno_matrix <- as.matrix(pheno)
   rcorr(pheno_matrix) #correlation r<|0.45| for all
@@ -282,7 +286,7 @@ attach(ksr_m)
                              axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6a
-#  ggsave("Single_fig/6a.Flowering.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/6a.Flowering.pdf", width = 7, height = 6, units = "in")
 #Bolt Date
   plot6b <- visreg(qu_pheno_2, "Bolt_Date", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
   geom_point(size=1)+ scale_x_continuous(name="Bolt Date")+
@@ -292,7 +296,7 @@ attach(ksr_m)
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6b
-#  ggsave("Single_fig/6b.bolt.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/6b.bolt.pdf", width = 7, height = 6, units = "in")
   
 #Growth Rate
   plot6c <- visreg(qu_pheno_2, "Growth_Rate", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -303,7 +307,7 @@ attach(ksr_m)
                          axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                          axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot6c   
-#  ggsave("Single_fig/6c.Growth_rate.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/6c.Growth_rate.pdf", width = 7, height = 6, units = "in")
   
   #Peak Numbers
   plot6_peak <- visreg(qu_pheno_2, "Flowering_Date", scale="response", partial=TRUE)
@@ -325,11 +329,11 @@ attach(ksr_m)
     
 ##################################################################################
 #7. Does morphology predict success?
-  morpho <- ksr_m %>% select(Pop, Seeds, SLA, Water_Content, Leaf_Toughness, Num_Trichomes) #subset data
+  morpho <- ksr_m %>% dplyr::select(Pop, Seeds, SLA, Water_Content, Leaf_Toughness, Num_Trichomes) #subset data
   morpho <- na.omit(morpho) #remove NA rows
   morpho_matrix <- as.matrix(morpho)
   rcorr(morpho_matrix) #Trichomes highl correalted with leaf thoughness. Keep trichomes. Rest cor <0.4
-  morpho <- ksr_m %>% select(Pop, Seeds, SLA, Water_Content, Num_Trichomes) #subset data
+  morpho <- ksr_m %>% dplyr::select(Pop, Seeds, SLA, Water_Content, Num_Trichomes) #subset data
   plot(morpho$SLA,morpho$Seeds) #All could have quadratic relationship
   plot(morpho$Water_Content,morpho$Seeds)
   plot(morpho$Num_Trichomes,morpho$Seeds)
@@ -353,7 +357,7 @@ attach(ksr_m)
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7a
-#  ggsave("Single_fig/7a.Tricomes.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/7a.Tricomes.pdf", width = 7, height = 6, units = "in")
   
   
   
@@ -366,7 +370,7 @@ attach(ksr_m)
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7b
-#  ggsave("Single_fig/7b.wc.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/7b.wc.pdf", width = 7, height = 6, units = "in")
   
   
   #Plot SLA
@@ -378,7 +382,7 @@ attach(ksr_m)
                            axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                            axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot7c
-#  ggsave("Single_fig/7c.SLA.pdf", width = 7, height = 6, units = "in")
+  #ggsave("Single_fig/7c.SLA.pdf", width = 7, height = 6, units = "in")
   
   #Peak Numbers
   plot7_peak <- visreg(qu_morpho_2, "Num_Trichomes", scale="response", partial=TRUE)
@@ -391,11 +395,11 @@ attach(ksr_m)
   max_all[1,2]
   
   
-  ## Cowplot Fig 4 export at 10 X 5 inches
+  ## Cowplot export at 10 X 5 inches
   plot_grid(plot6a,plot6b,plot6c,plot7a,plot7b,plot7c,ncol = 3)  
   
   
-  ##Include herbivores and traits all in Fig 3. Export at 10 X 5 inches
+  ##Include herbivores and traits all in Fig 3. Export at 9 X 8 inches landsacpe
   plot_grid(plot5a,plot5b,plot5c,plot6a,plot6b,plot6c,plot7a,plot7b,plot7c,ncol = 3)  
   
   
@@ -410,17 +414,17 @@ attach(ksr_m)
 
 ##################################################################################
 #8. Does broad chemistry predict success?
-  tphe <- ksr_m %>% select(Pop, Seeds, Leaf_Totphe,Flower_Totphe,Fruit_Totphe,
+  tphe <- ksr_m %>% dplyr::select(Pop, Seeds, Leaf_Totphe,Flower_Totphe,Fruit_Totphe,
                          Leaf_Oxidative_Capacity,Flower_Oxidative_Capacity,Fruit_Oxidative_Capacity) #subset data
   tphe <- na.omit(tphe) #remove NA rows, leaf separate
-  tphe_matrix <- tphe %>% select(-Pop,-Seeds) #subset data
+  tphe_matrix <- tphe %>% dplyr::select(-Pop,-Seeds) #subset data
   tphe_matrix <- as.matrix(tphe_matrix)
   rcorr(tphe_matrix) # Oxidative capacity is highly correlated to total phenolics. Remove oxidative capacity.
   
   #generate dataframes with only the correct tissue
-  tphe_leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Totphe)
+  tphe_leaf<-ksr_m %>% dplyr::select(Pop, Seeds, Leaf_Totphe)
   tphe_leaf<- na.omit(tphe_leaf) #remove NA rows, leaf separate
-  tphe_flr<-ksr_m %>% select(Pop, Seeds, Flower_Totphe, Fruit_Totphe)
+  tphe_flr<-ksr_m %>% dplyr::select(Pop, Seeds, Flower_Totphe, Fruit_Totphe)
   #tphe_flr<- na.omit(tphe_flr) #remove NA rows, leaf separate
   
   plot(tphe_leaf$Leaf_Totphe,tphe_leaf$Seeds) #Could be quadratic
@@ -455,8 +459,13 @@ attach(ksr_m)
   stepAIC(qu_tph_fl,direction="both") #remove flower_Totphe 1st order
   qu_flr_2 <- glm.nb(Seeds ~ Flower_Totphe + I(Flower_Totphe^2), data=tphe_flr) 
   summary(qu_flr_2)
-  Anova(qu_flr_2 ,type = 2) #Not significant, quadratic marginal
-
+  Anova(qu_flr_2 ,type = 2) 
+  
+  #Peak Numbers
+  plot7_peak <- visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE)
+  maxseed <- max(plot7_peak$fit$visregFit)
+  max_all <- plot7_peak$fit %>% filter(visregFit==maxseed)
+  max_all[1,1]
 
   #Plot Flower Total Phenolics
   plot8b<-visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE, gg=TRUE, line=list(col="black")) +
@@ -471,12 +480,6 @@ attach(ksr_m)
                              axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
   plot8b
   #ggsave("Single_fig/8b_Flower_totphe.pdf",width=7,height=6,units="in")
-  
-  #Peak Numbers
-  plot7_peak <- visreg(qu_flr_2, "Flower_Totphe", scale="response", partial=TRUE)
-  maxseed <- max(plot7_peak$fit$visregFit)
-  max_all <- plot7_peak$fit %>% filter(visregFit==maxseed)
-  max_all[1,1]
   
 ################################   
   #models for fruit phenolics
@@ -504,10 +507,10 @@ attach(ksr_m)
   
 ##################################################################################
 #9. Does detailed chemistry predict success? (Oe=Oenothein)
-    oenothein <- ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,
+    oenothein <- ksr_m %>% dplyr::select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A,
                            Flower_Oenothein_B, Flower_Oenothein_A,
                            Fruit_Oenothein_B, Fruit_Oenothein_A) #subset data
-    oenothein.matrix <- ksr_m %>% select(Leaf_Oenothein_B, Leaf_Oenothein_A,
+    oenothein.matrix <- ksr_m %>% dplyr::select(Leaf_Oenothein_B, Leaf_Oenothein_A,
                                 Flower_Oenothein_B, Flower_Oenothein_A,
                                 Fruit_Oenothein_B, Fruit_Oenothein_A) #subset data
     oenothein <- na.omit(oenothein) #remove NA rows
@@ -517,7 +520,7 @@ attach(ksr_m)
         write.csv(rcorr.oe$r,"oe_rcorr.csv", row.names = TRUE)
 
 #models for leaf oenothein A
-    oe_Leaf<-ksr_m %>% select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A)
+    oe_Leaf<-ksr_m %>% dplyr::select(Pop, Seeds, Leaf_Oenothein_B, Leaf_Oenothein_A)
     plot(oe_Leaf$Leaf_Oenothein_A,oe_Leaf$Seeds) #Could be second order
     plot(oe_Leaf$Leaf_Oenothein_B,oe_Leaf$Seeds) #First order only
     
@@ -544,7 +547,7 @@ attach(ksr_m)
     
     
 #model for flower oenothein A
-    oe_Flower<-ksr_m %>% select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A)
+    oe_Flower<-ksr_m %>% dplyr::select(Pop, Seeds, Flower_Oenothein_B, Flower_Oenothein_A)
     plot(oe_Flower$Flower_Oenothein_A,oe_Flower$Seeds) #Could also be qudratic
    plot(oe_Flower$Flower_Oenothein_B,oe_Flower$Seeds) #First order only
     
@@ -564,7 +567,7 @@ attach(ksr_m)
                                axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                                axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
     plot9b
-    #ggsave("Single_fig/9b_Flower_oe.pdf",width=7,height=6,units="in") #missing out outlier
+    #ggsave("Single_fig/9b_Flower_oe.pdf",width=7,height=6,units="in") 
     
     #Peak Numbers
     plot8_peak <- visreg(qu_A_Flower, "Flower_Oenothein_A", scale="response", partial=TRUE)
@@ -573,7 +576,7 @@ attach(ksr_m)
     max_all[1,1]
     
 #model for fruit oenothein A
-    oe_Fruit<-ksr_m %>% select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A)
+    oe_Fruit<-ksr_m %>% dplyr::select(Pop, Seeds, Fruit_Oenothein_B, Fruit_Oenothein_A)
     plot(oe_Fruit$Fruit_Oenothein_B,oe_Fruit$Seeds) #First order only
     plot(oe_Fruit$Fruit_Oenothein_A,oe_Fruit$Seeds)
     
@@ -592,7 +595,7 @@ attach(ksr_m)
                                axis.title.x = element_text(color="black", size=12, vjust = 0, face="bold"),
                                axis.title.y = element_text(color="black", size=15,vjust = 2, face="bold",hjust=0.6))
     plot9c
-    #ggsave("Single_fig/9c_Fruit_oe.pdf",width=7,height=6,units="in") #missing out outlier
+    #ggsave("Single_fig/9c_Fruit_oe.pdf",width=7,height=6,units="in")
     
     ## Cowplot Fig5 export at 7 X 8 inches
     plot_grid(plot8b,plot8c,plot9b,plot9c,ncol = 2)
